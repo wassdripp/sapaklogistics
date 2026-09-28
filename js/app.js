@@ -60,8 +60,9 @@ class TrackkApp {
       targetPanel.classList.add('active');
     }
 
-    // Close mobile sidebar if open
+    // Close mobile sidebar and backdrop if open
     document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-backdrop')?.classList.remove('show');
 
     // Update profile header
     this.updateUserRoleBadge();
@@ -142,9 +143,18 @@ class TrackkApp {
     // Back button in detail view
     document.getElementById('btn-back-to-list')?.addEventListener('click', () => this.switchView('shipments'));
 
-    // Mobile sidebar toggle
+    // Mobile sidebar toggle & backdrop
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
     document.getElementById('mobile-toggle')?.addEventListener('click', () => {
-      document.getElementById('sidebar')?.classList.toggle('open');
+      sidebar?.classList.toggle('open');
+      backdrop?.classList.toggle('show');
+    });
+
+    backdrop?.addEventListener('click', () => {
+      sidebar?.classList.remove('open');
+      backdrop?.classList.remove('show');
     });
 
     // Export CSV from public table
