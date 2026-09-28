@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPAK Logistics â€” Global Cargo & Shipment Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS for clean interactive world map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/sapak-logo.png">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="assets/sapak-logo.png" alt="SAPAK Logistics" class="brand-logo-img">
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="7" height="9" x="3" y="3" rx="1.5"/>
+            <rect width="7" height="5" x="14" y="3" rx="1.5"/>
+            <rect width="7" height="9" x="14" y="12" rx="1.5"/>
+            <rect width="7" height="5" x="3" y="16" rx="1.5"/>
+          </svg>
+          <span>Track</span>
+        </button>
+
+        <button class="nav-item" data-view="shipments" id="nav-shipments">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m7.5 4.27 9 5.15"/>
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5"/>
+            <path d="M12 22V12"/>
+          </svg>
+          <span>Shipments</span>
+          <span class="badge-count" id="nav-shipment-count">0</span>
+        </button>
+
+        <button class="nav-item btn-primary-action" id="nav-add-btn">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8"/>
+            <path d="M8 12h8"/>
+          </svg>
+          <span>New Shipment</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="quick-status-card">
+          <div class="pulse-indicator">
+            <span class="pulse-dot"></span>
+            <span class="pulse-text">Live Syncing</span>
+          </div>
+          <p class="quick-status-desc">All shipping routes updating in real-time.</p>
+        </div>
+
+        <div class="user-profile">
+          <div class="avatar">SL</div>
+          <div class="user-meta">
+            <span class="user-name">SAPAK Dispatch</span>
+            <span class="user-role">Operations desk</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Bar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="quick-search-box">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="global-search-input" placeholder="Search by tracking #, recipient, or city..." autocomplete="off">
+            <kbd class="search-kbd">âŒ˜K</kbd>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-terracotta" id="btn-top-add">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            <span>Track New Item</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Main View Container -->
+      <main class="content-scroll" id="content-area">
+        
+        <!-- ================= VIEW 1: TRACK YOUR SHIPMENT ================= -->
+        <section class="view-panel active" id="view-dashboard">
+          <div class="track-hero">
+            <div class="track-hero-inner">
+              <div class="track-hero-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                </svg>
+              </div>
+              <h1 class="track-hero-title">Track Your Shipment</h1>
+              <p class="track-hero-subtitle">Enter your tracking number to see real-time location, route map, and delivery status.</p>
+              
+              <form id="form-direct-lookup" class="track-hero-form">
+                <div class="track-input-group">
+                  <svg class="track-input-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input type="text" id="direct-lookup-input" class="track-input" placeholder="Enter tracking number (e.g. SPK-482189)" required autocomplete="off">
+                  <button type="submit" class="btn btn-terracotta btn-track-submit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14"/>
+                      <path d="m12 5 7 7-7 7"/>
+                    </svg>
+                    <span>Track</span>
+                  </button>
+                </div>
+              </form>
+
+              <p class="track-hero-hint">Or <button class="btn-text" id="btn-hero-add-shipment">create a new shipment</button> to start tracking</p>
+            </div>
+          </div>
+
+          <!-- Recent Tracked Shipments -->
+          <div class="recent-tracked-section">
+            <h3 class="recent-tracked-title">Your Shipments</h3>
+            <div class="recent-tracked-grid" id="recent-tracked-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 2: SHIPMENTS LIST ================= -->
+        <section class="view-panel" id="view-shipments">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Shipments</h1>
+              <p class="view-subtitle">Manage, filter, and track all recorded cargo manifests</p>
+            </div>
+            <div class="view-actions">
+              <button class="btn btn-secondary" id="btn-export-csv-table">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export CSV</span>
+              </button>
+              <button class="btn btn-terracotta" id="btn-list-add">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14"/>
+                  <path d="M5 12h14"/>
+                </svg>
+                <span>Add Shipment</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="table-filter-bar card">
+            <div class="filter-group-left">
+              <div class="search-input-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="text" id="table-search-input" placeholder="Search tracking #, recipient, origin, destination...">
+              </div>
+
+              <div class="filter-select-wrapper">
+                <label for="filter-status-select" class="filter-label">Status:</label>
+                <select id="filter-status-select" class="filter-select">
+                  <option value="ALL">All Statuses</option>
+                  <option value="In Transit">In Transit</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Out for Delivery">Out for Delivery</option>
+                  <option value="Delayed">Delayed</option>
+                </select>
+              </div>
+
+              <div class="filter-select-wrapper">
+                <label for="filter-carrier-select" class="filter-label">Carrier:</label>
+                <select id="filter-carrier-select" class="filter-select">
+                  <option value="ALL">All Carriers</option>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-summary">
+              <span id="filtered-items-count">Showing 0 shipments</span>
+            </div>
+          </div>
+
+          <!-- Table Card -->
+          <div class="card table-container">
+            <table class="data-table" id="shipments-table">
+              <thead>
+                <tr>
+                  <th>Tracking ID</th>
+                  <th>Recipient</th>
+                  <th>Origin</th>
+                  <th>Destination</th>
+                  <th>Carrier</th>
+                  <th>Status</th>
+                  <th>Est. Delivery</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="shipments-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+            
+            <div class="empty-state-card" id="table-empty-state" style="display: none;">
+              <div class="empty-icon">ðŸ“¦</div>
+              <h3>No shipments found</h3>
+              <p>Try modifying your search or add a new shipment to track.</p>
+              <button class="btn btn-terracotta" id="btn-empty-add">+ Create Shipment</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 3: SHIPMENT DETAIL & WORLD MAP ================= -->
+        <section class="view-panel" id="view-detail">
+          <div class="detail-header-nav">
+            <button class="btn btn-outline btn-back" id="btn-back-to-list">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back to Shipments</span>
+            </button>
+            
+            <div class="detail-nav-actions">
+              <button class="btn btn-outline" id="btn-detail-copy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+                <span>Copy Tracking #</span>
+              </button>
+              <button class="btn btn-terracotta" id="btn-open-status-modal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+                <span>Update Status</span>
+              </button>
+              <button class="btn btn-danger-outline" id="btn-detail-delete" title="Delete this shipment">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Detail Headline -->
+          <div class="shipment-hero-banner card">
+            <div class="hero-left">
+              <div class="hero-tracking-tag">
+                <span class="tracking-label">TRACKING ID</span>
+                <span class="tracking-number-code" id="detail-tracking-code">SPK-00000</span>
+              </div>
+              <h2 class="hero-recipient" id="detail-recipient">Recipient Name</h2>
+              <div class="hero-route-summary">
+                <span class="route-city" id="detail-origin-city">Origin</span>
+                <svg class="route-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                <span class="route-city" id="detail-dest-city">Destination</span>
+              </div>
+            </div>
+
+            <div class="hero-right">
+              <div class="detail-status-pill-wrap" id="detail-status-container">
+                <span class="status-badge status-lg status-transit">In Transit</span>
+              </div>
+              <div class="hero-progress-container">
+                <div class="progress-labels">
+                  <span>Routing Progress</span>
+                  <span id="detail-progress-percent">65%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="detail-progress-fill" style="width: 65%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- â­ INTERACTIVE WORLD MAP COMPONENT â­ -->
+          <div class="card map-tracking-card">
+            <div class="map-card-header">
+              <div class="map-title-row">
+                <div class="map-pin-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="card-title">Live Geolocation Route Map</h3>
+                  <p class="card-subtitle">Real-time transit path between dispatch hub and delivery point</p>
+                </div>
+              </div>
+
+              <div class="map-legend">
+                <div class="legend-item"><span class="legend-dot origin-dot"></span> Origin</div>
+                <div class="legend-item"><span class="legend-dot current-dot"></span> Live Parcel</div>
+                <div class="legend-item"><span class="legend-dot dest-dot"></span> Destination</div>
+              </div>
+            </div>
+
+            <!-- Leaflet Map Container -->
+            <div class="map-viewport-wrapper">
+              <div id="shipment-leaflet-map" class="leaflet-map-element"></div>
+              
+              <!-- Map Overlay Floating Stat Box -->
+              <div class="map-floating-overlay" id="map-floating-info">
+                <div class="floating-stat">
+                  <span class="stat-caption">Last Reported Hub</span>
+                  <span class="stat-highlight" id="map-hub-name">Mid-transit corridor</span>
+                </div>
+                <div class="floating-divider"></div>
+                <div class="floating-stat">
+                  <span class="stat-caption">Estimated Arrival</span>
+                  <span class="stat-highlight" id="map-est-date">Oct 12, 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Grid: Metadata Info Cards + Timeline -->
+          <div class="detail-two-col-grid">
+            <!-- Left Column: Specs / Key Info -->
+            <div class="specs-col">
+              <div class="card info-box-grid">
+                <div class="info-cell">
+                  <span class="info-label">Carrier Partner</span>
+                  <span class="info-val font-semibold" id="detail-carrier">FedEx Express</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Package Category</span>
+                  <span class="info-val" id="detail-package-type">Commercial Goods</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Weight / Volume</span>
+                  <span class="info-val" id="detail-weight">3.4 kg (Standard)</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Dispatch Date</span>
+                  <span class="info-val" id="detail-dispatch-date">Sep 24, 2026</span>
+                </div>
+                <div class="info-cell info-cell-full">
+                  <span class="info-label">Delivery Instructions</span>
+                  <p class="info-val info-notes" id="detail-notes">Leave at reception desk if unattended.</p>
+                </div>
+              </div>
+
+              <!-- Quick Next Action card -->
+              <div class="card advance-step-card">
+                <div class="advance-card-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 8 12 12 14 14"/>
+                  </svg>
+                  <span>Quick Status Transition</span>
+                </div>
+                <p class="advance-card-desc">Move this package along its normal lifecycle or register a checkpoint scan.</p>
+                <div class="quick-advance-buttons" id="quick-advance-btns">
+                  <!-- Buttons rendered by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Vertical Journey Stepper Timeline -->
+            <div class="timeline-col">
+              <div class="card timeline-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Journey Milestones</h3>
+                    <p class="card-subtitle">Verifiable carrier scan history</p>
+                  </div>
+                  <button class="btn btn-sm btn-outline" id="btn-add-checkpoint-log">
+                    + Add Scan Note
+                  </button>
+                </div>
+
+                <div class="stepper-timeline" id="detail-timeline-steps">
+                  <!-- Dynamic milestones rendered by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CREATE NEW SHIPMENT ================= -->
+  <div class="modal-backdrop" id="modal-new-shipment">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="m3.3 7 8.7 5 8.7-5"/>
+              <path d="M12 22V12"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Track New Shipment</h2>
+            <p class="modal-subtitle">Register a parcel with origin and destination coordinates for live tracking</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="form-create-shipment" class="modal-body">
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="input-tracking-id" class="form-label">
+              Tracking Number <span class="required-star">*</span>
+            </label>
+            <div class="input-with-action">
+              <input type="text" id="input-tracking-id" class="form-input" required placeholder="SPK-98310">
+              <button type="button" class="btn-input-accessory" id="btn-gen-tracking" title="Generate random tracking code">
+                ðŸŽ² Auto
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-recipient" class="form-label">
+              Recipient Name <span class="required-star">*</span>
+            </label>
+            <input type="text" id="input-recipient" class="form-input" required placeholder="e.g. Maya Lin, Acme Corp">
+          </div>
+        </div>
+
+        <div class="form-row form-row-2">
+          <!-- Origin City Selection -->
+          <div class="form-group">
+            <label for="select-origin-city" class="form-label">
+              Origin City / Hub <span class="required-star">*</span>
+            </label>
+            <select id="select-origin-city" class="form-select" required>
+              <!-- Filled with cities via JS -->
+            </select>
+          </div>
+
+          <!-- Destination City Selection -->
+          <div class="form-group">
+            <label for="select-dest-city" class="form-label">
+              Destination City <span class="required-star">*</span>
+            </label>
+            <select id="select-dest-city" class="form-select" required>
+              <!-- Filled with cities via JS -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label for="select-carrier" class="form-label">
+              Logistics Carrier <span class="required-star">*</span>
+            </label>
+            <select id="select-carrier" class="form-select" required>
+              <option value="FedEx">FedEx</option>
+              <option value="DHL Express">DHL Express</option>
+              <option value="UPS">UPS</option>
+              <option value="USPS Priority">USPS Priority</option>
+              <option value="Royal Mail">Royal Mail</option>
+              <option value="Maersk Line">Maersk Line</option>
+              <option value="Japan Post">Japan Post</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="select-status" class="form-label">
+              Initial Status
+            </label>
+            <select id="select-status" class="form-select">
+              <option value="Pending">Pending (Label Created)</option>
+              <option value="In Transit" selected>In Transit</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Delayed">Delayed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-est-delivery" class="form-label">
+              Estimated Delivery
+            </label>
+            <input type="date" id="input-est-delivery" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="input-package-type" class="form-label">
+              Package Type / Contents
+            </label>
+            <input type="text" id="input-package-type" class="form-input" placeholder="e.g. Tech Components, Apparel, Documents">
+          </div>
+
+          <div class="form-group">
+            <label for="input-weight" class="form-label">
+              Package Weight
+            </label>
+            <input type="text" id="input-weight" class="form-input" placeholder="e.g. 2.5 kg">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="input-notes" class="form-label">
+            Handling Notes or Delivery Instructions
+          </label>
+          <textarea id="input-notes" class="form-textarea" rows="2" placeholder="e.g. Signature required upon arrival; handle with care"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-terracotta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Start Tracking Shipment</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: UPDATE STATUS & ADD NOTE ================= -->
+  <div class="modal-backdrop" id="modal-update-status">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Update Shipment Status</h2>
+          <p class="modal-subtitle" id="status-modal-subtitle">SPK-89240</p>
+        </div>
+        <button class="btn-close-modal" id="modal-status-close-btn">&times;</button>
+      </div>
+
+      <form id="form-update-status" class="modal-body">
+        <input type="hidden" id="status-update-shipment-id">
+        
+        <div class="form-group">
+          <label for="status-update-select" class="form-label">New Status</label>
+          <select id="status-update-select" class="form-select">
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Delayed">Delayed</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status-update-location" class="form-label">Current Location / Hub</label>
+          <input type="text" id="status-update-location" class="form-input" placeholder="e.g. Frankfurt Sort Facility">
+        </div>
+
+        <div class="form-group">
+          <label for="status-update-note" class="form-label">Checkpoint Note / Activity</label>
+          <input type="text" id="status-update-note" class="form-input" placeholder="e.g. Cleared customs inspection">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-status-modal">Cancel</button>
+          <button type="submit" class="btn btn-terracotta">Save Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Shelf -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet JS for World Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Modules -->
+  <script src="js/cities.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
