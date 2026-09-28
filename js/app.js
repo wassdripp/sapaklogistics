@@ -473,7 +473,7 @@ class TrackkApp {
         this.updateUserRoleBadge();
         this.renderAdminView();
       } else {
-        showToast('Invalid passcode. Default is admin123', 'error');
+        showToast('Invalid administrator passcode', 'error');
       }
     });
 
