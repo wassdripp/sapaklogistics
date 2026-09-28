@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAPAK Logistics â€” Global Cargo & Shipment Tracking</title>
+  <title>SAPAK Logistics — Global Cargo & Shipment Tracking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -25,12 +25,10 @@
       <nav class="nav-menu">
         <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
           <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="7" height="9" x="3" y="3" rx="1.5"/>
-            <rect width="7" height="5" x="14" y="3" rx="1.5"/>
-            <rect width="7" height="9" x="14" y="12" rx="1.5"/>
-            <rect width="7" height="5" x="3" y="16" rx="1.5"/>
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
           </svg>
-          <span>Track</span>
+          <span>Track Package</span>
         </button>
 
         <button class="nav-item" data-view="shipments" id="nav-shipments">
@@ -40,17 +38,16 @@
             <path d="m3.3 7 8.7 5 8.7-5"/>
             <path d="M12 22V12"/>
           </svg>
-          <span>Shipments</span>
+          <span>All Shipments</span>
           <span class="badge-count" id="nav-shipment-count">0</span>
         </button>
 
-        <button class="nav-item btn-primary-action" id="nav-add-btn">
+        <button class="nav-item btn-nav-admin" data-view="admin" id="nav-admin">
           <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 8v8"/>
-            <path d="M8 12h8"/>
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
-          <span>New Shipment</span>
+          <span>Admin Portal</span>
         </button>
       </nav>
 
@@ -64,10 +61,10 @@
         </div>
 
         <div class="user-profile">
-          <div class="avatar">SL</div>
+          <div class="avatar" id="sidebar-user-avatar">SL</div>
           <div class="user-meta">
-            <span class="user-name">SAPAK Dispatch</span>
-            <span class="user-role">Operations desk</span>
+            <span class="user-name" id="sidebar-user-name">SAPAK Logistics</span>
+            <span class="user-role" id="sidebar-user-role">Public Tracking Portal</span>
           </div>
         </div>
       </div>
@@ -91,17 +88,17 @@
               <path d="m21 21-4.3-4.3"/>
             </svg>
             <input type="text" id="global-search-input" placeholder="Search by tracking #, recipient, or city..." autocomplete="off">
-            <kbd class="search-kbd">âŒ˜K</kbd>
+            <kbd class="search-kbd">⌘K</kbd>
           </div>
         </div>
 
         <div class="topbar-right">
-          <button class="btn btn-terracotta" id="btn-top-add">
+          <button class="btn btn-outline" id="btn-top-admin-toggle">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14"/>
-              <path d="M5 12h14"/>
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <span>Track New Item</span>
+            <span id="top-admin-btn-label">Admin Portal</span>
           </button>
         </div>
       </header>
@@ -109,7 +106,7 @@
       <!-- Scrollable Main View Container -->
       <main class="content-scroll" id="content-area">
         
-        <!-- ================= VIEW 1: TRACK YOUR SHIPMENT ================= -->
+        <!-- ================= VIEW 1: PUBLIC TRACK YOUR SHIPMENT ================= -->
         <section class="view-panel active" id="view-dashboard">
           <div class="track-hero">
             <div class="track-hero-inner">
@@ -120,7 +117,7 @@
                 </svg>
               </div>
               <h1 class="track-hero-title">Track Your Shipment</h1>
-              <p class="track-hero-subtitle">Enter your tracking number to see real-time location, route map, and delivery status.</p>
+              <p class="track-hero-subtitle">Enter your SAPAK tracking number to view real-time location, route map, and delivery milestones.</p>
               
               <form id="form-direct-lookup" class="track-hero-form">
                 <div class="track-input-group">
@@ -138,26 +135,29 @@
                   </button>
                 </div>
               </form>
-
-              <p class="track-hero-hint">Or <button class="btn-text" id="btn-hero-add-shipment">create a new shipment</button> to start tracking</p>
             </div>
           </div>
 
-          <!-- Recent Tracked Shipments -->
+          <!-- Public Tracked Shipments Cards Grid -->
           <div class="recent-tracked-section">
-            <h3 class="recent-tracked-title">Your Shipments</h3>
+            <div class="card-header">
+              <div>
+                <h3 class="recent-tracked-title">Active Logistics Directory</h3>
+                <p class="card-subtitle">Click any cargo shipment to view live GPS route and checkpoint history</p>
+              </div>
+            </div>
             <div class="recent-tracked-grid" id="recent-tracked-grid">
-              <!-- Populated by JS -->
+              <!-- Populated dynamically -->
             </div>
           </div>
         </section>
 
-        <!-- ================= VIEW 2: SHIPMENTS LIST ================= -->
+        <!-- ================= VIEW 2: PUBLIC SHIPMENTS DIRECTORY ================= -->
         <section class="view-panel" id="view-shipments">
           <div class="view-header">
             <div>
-              <h1 class="view-title">Shipments</h1>
-              <p class="view-subtitle">Manage, filter, and track all recorded cargo manifests</p>
+              <h1 class="view-title">Shipments Directory</h1>
+              <p class="view-subtitle">Live status across domestic and international shipping corridors</p>
             </div>
             <div class="view-actions">
               <button class="btn btn-secondary" id="btn-export-csv-table">
@@ -167,13 +167,6 @@
                   <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
                 <span>Export CSV</span>
-              </button>
-              <button class="btn btn-terracotta" id="btn-list-add">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 5v14"/>
-                  <path d="M5 12h14"/>
-                </svg>
-                <span>Add Shipment</span>
               </button>
             </div>
           </div>
@@ -197,6 +190,7 @@
                   <option value="Delivered">Delivered</option>
                   <option value="Pending">Pending</option>
                   <option value="Out for Delivery">Out for Delivery</option>
+                  <option value="Paused">Paused / On Hold</option>
                   <option value="Delayed">Delayed</option>
                 </select>
               </div>
@@ -236,15 +230,14 @@
             </table>
             
             <div class="empty-state-card" id="table-empty-state" style="display: none;">
-              <div class="empty-icon">ðŸ“¦</div>
+              <div class="empty-icon">📦</div>
               <h3>No shipments found</h3>
-              <p>Try modifying your search or add a new shipment to track.</p>
-              <button class="btn btn-terracotta" id="btn-empty-add">+ Create Shipment</button>
+              <p>Try modifying your search criteria.</p>
             </div>
           </div>
         </section>
 
-        <!-- ================= VIEW 3: SHIPMENT DETAIL & WORLD MAP ================= -->
+        <!-- ================= VIEW 3: PUBLIC SHIPMENT DETAIL & WORLD MAP ================= -->
         <section class="view-panel" id="view-detail">
           <div class="detail-header-nav">
             <button class="btn btn-outline btn-back" id="btn-back-to-list">
@@ -252,7 +245,7 @@
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
-              <span>Back to Shipments</span>
+              <span>Back to Directory</span>
             </button>
             
             <div class="detail-nav-actions">
@@ -262,20 +255,6 @@
                   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
                 </svg>
                 <span>Copy Tracking #</span>
-              </button>
-              <button class="btn btn-terracotta" id="btn-open-status-modal">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 20h9"/>
-                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                </svg>
-                <span>Update Status</span>
-              </button>
-              <button class="btn btn-danger-outline" id="btn-detail-delete" title="Delete this shipment">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 6h18"/>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
               </button>
             </div>
           </div>
@@ -314,7 +293,7 @@
             </div>
           </div>
 
-          <!-- â­ INTERACTIVE WORLD MAP COMPONENT â­ -->
+          <!-- INTERACTIVE GOOGLE MAP COMPONENT -->
           <div class="card map-tracking-card">
             <div class="map-card-header">
               <div class="map-title-row">
@@ -326,7 +305,7 @@
                 </div>
                 <div>
                   <h3 class="card-title">Live Geolocation Route Map</h3>
-                  <p class="card-subtitle">Real-time transit path between dispatch hub and delivery point</p>
+                  <p class="card-subtitle">Real-time transit trajectory powered by Google Maps</p>
                 </div>
               </div>
 
@@ -382,21 +361,6 @@
                   <p class="info-val info-notes" id="detail-notes">Leave at reception desk if unattended.</p>
                 </div>
               </div>
-
-              <!-- Quick Next Action card -->
-              <div class="card advance-step-card">
-                <div class="advance-card-title">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 8 12 12 14 14"/>
-                  </svg>
-                  <span>Quick Status Transition</span>
-                </div>
-                <p class="advance-card-desc">Move this package along its normal lifecycle or register a checkpoint scan.</p>
-                <div class="quick-advance-buttons" id="quick-advance-btns">
-                  <!-- Buttons rendered by JS -->
-                </div>
-              </div>
             </div>
 
             <!-- Right Column: Vertical Journey Stepper Timeline -->
@@ -407,9 +371,6 @@
                     <h3 class="card-title">Journey Milestones</h3>
                     <p class="card-subtitle">Verifiable carrier scan history</p>
                   </div>
-                  <button class="btn btn-sm btn-outline" id="btn-add-checkpoint-log">
-                    + Add Scan Note
-                  </button>
                 </div>
 
                 <div class="stepper-timeline" id="detail-timeline-steps">
@@ -420,11 +381,158 @@
           </div>
         </section>
 
+        <!-- ================= VIEW 4: ADMIN PORTAL ================= -->
+        <section class="view-panel" id="view-admin">
+          
+          <!-- State A: Admin Login Required Screen -->
+          <div class="admin-login-wrapper" id="admin-login-screen">
+            <div class="card admin-login-card">
+              <div class="admin-login-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              <h2 class="view-title" style="font-size: 1.4rem; margin-bottom: 6px;">SAPAK Admin Portal</h2>
+              <p class="view-subtitle" style="margin-bottom: 24px;">Enter administrator passcode to manage shipments, pause routes, and dispatch manifests.</p>
+
+              <form id="form-admin-login" style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-group" style="text-align: left;">
+                  <label for="input-admin-pass" class="form-label">Administrator Passcode</label>
+                  <input type="password" id="input-admin-pass" class="form-input" placeholder="Enter admin passcode (Default: admin123)" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-terracotta" style="width: 100%; padding: 11px;">
+                  <span>Authenticate & Open Admin Dashboard</span>
+                </button>
+              </form>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 14px;">Default access code: <code style="background: var(--bg-subtle); padding: 2px 6px; border-radius: 4px;">admin123</code></p>
+            </div>
+          </div>
+
+          <!-- State B: Admin Active Dashboard (When logged in) -->
+          <div id="admin-dashboard-screen" style="display: none;">
+            <div class="view-header">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                  <h1 class="view-title">Fleet Dispatch & Control</h1>
+                  <span class="admin-badge">Admin Mode</span>
+                </div>
+                <p class="view-subtitle">Create new shipments, toggle status, hold/pause parcels, and manage records</p>
+              </div>
+              <div class="view-actions">
+                <button class="btn btn-secondary" id="btn-admin-logout">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  <span>Lock / Logout</span>
+                </button>
+                <button class="btn btn-terracotta" id="btn-admin-create-shipment">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14"/>
+                    <path d="M5 12h14"/>
+                  </svg>
+                  <span>+ Create Shipment</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Admin Overview Metrics Grid -->
+            <div class="metrics-grid">
+              <div class="metric-card" id="card-admin-stat-total">
+                <div class="metric-header">
+                  <span class="metric-label">Total Shipments</span>
+                  <div class="metric-icon-wrap" style="background: var(--bg-subtle); color: var(--text-primary);">📦</div>
+                </div>
+                <div class="metric-value" id="admin-stat-total">0</div>
+                <div class="metric-foot"><span class="metric-subtext">All registered parcels</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">In Transit</span>
+                  <div class="metric-icon-wrap icon-transit">🚚</div>
+                </div>
+                <div class="metric-value" id="admin-stat-transit">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Actively moving</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">Paused / On Hold</span>
+                  <div class="metric-icon-wrap" style="background: var(--status-paused-bg); color: var(--status-paused-text);">⏸️</div>
+                </div>
+                <div class="metric-value" id="admin-stat-paused">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Temporary routing holds</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">Delivered</span>
+                  <div class="metric-icon-wrap icon-delivered">✅</div>
+                </div>
+                <div class="metric-value" id="admin-stat-delivered">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Completed drop-offs</span></div>
+              </div>
+            </div>
+
+            <!-- Admin Filter Bar -->
+            <div class="table-filter-bar card">
+              <div class="filter-group-left">
+                <div class="search-input-pill">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input type="text" id="admin-table-search" placeholder="Search manifest database...">
+                </div>
+
+                <div class="filter-select-wrapper">
+                  <label for="admin-filter-status" class="filter-label">Status:</label>
+                  <select id="admin-filter-status" class="filter-select">
+                    <option value="ALL">All Statuses</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Paused">Paused / On Hold</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Delayed">Delayed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-summary">
+                <span id="admin-table-count">Showing 0 shipments</span>
+              </div>
+            </div>
+
+            <!-- Admin Table -->
+            <div class="card table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tracking ID</th>
+                    <th>Recipient</th>
+                    <th>Origin &rarr; Destination</th>
+                    <th>Carrier</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th class="text-right">Admin Controls</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-shipments-tbody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
 
-  <!-- ================= MODAL: CREATE NEW SHIPMENT ================= -->
+  <!-- ================= MODAL: CREATE NEW SHIPMENT (ADMIN ONLY) ================= -->
   <div class="modal-backdrop" id="modal-new-shipment">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -437,8 +545,8 @@
             </svg>
           </div>
           <div>
-            <h2 class="modal-title">Track New Shipment</h2>
-            <p class="modal-subtitle">Register a parcel with origin and destination coordinates for live tracking</p>
+            <h2 class="modal-title">Admin: Create New Shipment</h2>
+            <p class="modal-subtitle">Register a parcel with origin and destination coordinates for tracking</p>
           </div>
         </div>
         <button class="btn-close-modal" id="modal-close-btn" aria-label="Close modal">&times;</button>
@@ -453,7 +561,7 @@
             <div class="input-with-action">
               <input type="text" id="input-tracking-id" class="form-input" required placeholder="SPK-98310">
               <button type="button" class="btn-input-accessory" id="btn-gen-tracking" title="Generate random tracking code">
-                ðŸŽ² Auto
+                🎲 Auto
               </button>
             </div>
           </div>
@@ -512,6 +620,7 @@
               <option value="Pending">Pending (Label Created)</option>
               <option value="In Transit" selected>In Transit</option>
               <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Paused">Paused / On Hold</option>
               <option value="Delivered">Delivered</option>
               <option value="Delayed">Delayed</option>
             </select>
@@ -551,22 +660,19 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
           <button type="submit" class="btn btn-terracotta">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span>Start Tracking Shipment</span>
+            <span>Register & Start Tracking</span>
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ================= MODAL: UPDATE STATUS & ADD NOTE ================= -->
+  <!-- ================= MODAL: UPDATE STATUS & ADD NOTE (ADMIN) ================= -->
   <div class="modal-backdrop" id="modal-update-status">
     <div class="modal-dialog modal-dialog-sm">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title">Update Shipment Status</h2>
+          <h2 class="modal-title">Admin: Update Status</h2>
           <p class="modal-subtitle" id="status-modal-subtitle">SPK-89240</p>
         </div>
         <button class="btn-close-modal" id="modal-status-close-btn">&times;</button>
@@ -578,9 +684,10 @@
         <div class="form-group">
           <label for="status-update-select" class="form-label">New Status</label>
           <select id="status-update-select" class="form-select">
-            <option value="Pending">Pending</option>
+            <option value="Pending">Pending (Label Created)</option>
             <option value="In Transit">In Transit</option>
             <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Paused">Paused / On Hold</option>
             <option value="Delivered">Delivered</option>
             <option value="Delayed">Delayed</option>
           </select>
@@ -598,9 +705,88 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="btn-cancel-status-modal">Cancel</button>
-          <button type="submit" class="btn btn-terracotta">Save Update</button>
+          <button type="submit" class="btn btn-terracotta">Save Status Update</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PAUSE / HOLD SHIPMENT (ADMIN) ================= -->
+  <div class="modal-backdrop" id="modal-pause-shipment">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge modal-icon-warning">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="4" height="16" x="6" y="4"/>
+              <rect width="4" height="16" x="14" y="4"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title" id="pause-modal-title">Pause Shipment</h2>
+            <p class="modal-subtitle" id="pause-modal-subtitle">Place routing on hold</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-pause-close-btn">&times;</button>
+      </div>
+
+      <form id="form-pause-shipment" class="modal-body">
+        <input type="hidden" id="pause-target-id">
+        <input type="hidden" id="pause-action-type" value="pause">
+
+        <div class="form-group" id="pause-reason-group">
+          <label for="select-pause-reason" class="form-label">Hold Reason</label>
+          <select id="select-pause-reason" class="form-select">
+            <option value="Customs clearance inspection hold">Customs clearance inspection hold</option>
+            <option value="Severe weather / Flight delay hold">Severe weather / Flight delay hold</option>
+            <option value="Recipient address verification needed">Recipient address verification needed</option>
+            <option value="Payment / Duty verification hold">Payment / Duty verification hold</option>
+            <option value="Customer requested delivery reschedule">Customer requested delivery reschedule</option>
+            <option value="Security compliance review">Security compliance review</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="pause-custom-note-group">
+          <label for="input-pause-note" class="form-label">Additional Checkpoint Note</label>
+          <input type="text" id="input-pause-note" class="form-input" placeholder="e.g. Awaiting customs release documentation">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-pause-modal">Cancel</button>
+          <button type="submit" class="btn btn-warning" id="btn-submit-pause">Confirm Hold</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CONFIRM DELETE SHIPMENT (ADMIN) ================= -->
+  <div class="modal-backdrop" id="modal-delete-confirm">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge modal-icon-danger">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Delete Shipment?</h2>
+            <p class="modal-subtitle">Permanent action</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-delete-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.5;">
+          Are you sure you want to permanently delete shipment <strong id="delete-modal-target-id" style="color: var(--text-primary); font-family: monospace;">SPK-000000</strong>? All GPS coordinates and scan history will be wiped.
+        </p>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+          <button type="button" class="btn btn-danger" id="btn-confirm-delete">Delete Permanently</button>
+        </div>
+      </div>
     </div>
   </div>
 

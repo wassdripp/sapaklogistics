@@ -49,6 +49,14 @@
   --status-delayed-text: #B91C1C;
   --status-delayed-border: #FECACA;
 
+  --status-paused-bg: #FFFBEB;
+  --status-paused-text: #B45309;
+  --status-paused-border: #FDE68A;
+
+  --status-hold-bg: #F3E8FF;
+  --status-hold-text: #7E22CE;
+  --status-hold-border: #E9D5FF;
+
   /* Typography */
   --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1069,9 +1077,104 @@ button, input, select, textarea {
 }
 .status-badge.status-delayed::before { background: var(--status-delayed-text); }
 
+.status-badge.status-paused {
+  background: var(--status-paused-bg);
+  color: var(--status-paused-text);
+  border-color: var(--status-paused-border);
+}
+.status-badge.status-paused::before { background: var(--status-paused-text); }
+
+.status-badge.status-hold {
+  background: var(--status-hold-bg);
+  color: var(--status-hold-text);
+  border-color: var(--status-hold-border);
+}
+.status-badge.status-hold::before { background: var(--status-hold-text); }
+
 .status-badge.status-lg {
   padding: 6px 14px;
   font-size: 0.88rem;
+}
+
+/* ================= Admin Portal Styling ================= */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(217, 107, 78, 0.15);
+  border: 1px solid rgba(217, 107, 78, 0.35);
+  color: var(--accent-terracotta);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+
+.admin-login-card {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  padding: 36px 30px;
+}
+
+.admin-login-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-terracotta-subtle);
+  color: var(--accent-terracotta);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px auto;
+}
+
+.btn-danger {
+  background-color: #DC2626;
+  color: #FFFFFF;
+}
+
+.btn-danger:hover {
+  background-color: #B91C1C;
+}
+
+.btn-warning {
+  background-color: #F59E0B;
+  color: #FFFFFF;
+}
+
+.btn-warning:hover {
+  background-color: #D97706;
+}
+
+.modal-icon-danger {
+  background-color: #FEE2E2 !important;
+  color: #DC2626 !important;
+}
+
+.modal-icon-warning {
+  background-color: #FEF3C7 !important;
+  color: #B45309 !important;
+}
+
+.btn-nav-admin {
+  color: #FFB3A1 !important;
+  border: 1px solid rgba(217, 107, 78, 0.3) !important;
+  background: rgba(217, 107, 78, 0.08) !important;
+}
+
+.btn-nav-admin:hover {
+  background: var(--accent-terracotta) !important;
+  color: #FFFFFF !important;
 }
 
 /* ================= View 2: Shipments List & Table ================= */

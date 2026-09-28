@@ -77,13 +77,15 @@ function renderStatusBadge(status, isLarge = false) {
   let badgeClass = 'status-transit';
   const s = (status || '').toLowerCase();
   
-  if (s.includes('deliver')) {
+  if (s.includes('pause') || s.includes('hold')) {
+    badgeClass = 'status-paused';
+  } else if (s.includes('deliver')) {
     badgeClass = 'status-delivered';
   } else if (s.includes('out')) {
     badgeClass = 'status-out';
   } else if (s.includes('pend') || s.includes('label')) {
     badgeClass = 'status-pending';
-  } else if (s.includes('delay') || s.includes('hold') || s.includes('except')) {
+  } else if (s.includes('delay') || s.includes('except')) {
     badgeClass = 'status-delayed';
   }
 
