@@ -124,3 +124,85 @@ function exportShipmentsToCSV(shipments) {
 
   showToast("CSV export initiated!");
 }
+
+function encodeShipmentData(shipment) {
+  try {
+    const jsonStr = JSON.stringify(shipment);
+    return encodeURIComponent(btoa(unescape(encodeURIComponent(jsonStr))));
+  } catch (e) {
+    console.error("Error encoding shipment:", e);
+    return "";
+  }
+}
+
+function decodeShipmentData(encodedStr) {
+  try {
+    const decodedB64 = decodeURIComponent(escape(atob(decodeURIComponent(encodedStr))));
+    return JSON.parse(decodedB64);
+  } catch (e) {
+    console.error("Error decoding shipment:", e);
+    return null;
+  }
+}
+
+function copyTrackingLink(shipmentId, successMsg = 'Direct tracking link copied!') {
+  const item = (typeof store !== 'undefined') ? store.getById(shipmentId) : null;
+  const baseUrl = window.location.origin + window.location.pathname;
+  let shareUrl = `${baseUrl}#track/${shipmentId}`;
+  
+  if (item) {
+    const encodedPayload = encodeShipmentData(item);
+    if (encodedPayload) {
+      shareUrl += `?d=${encodedPayload}`;
+    }
+  }
+
+  // If Web Share API is natively supported (e.g. mobile browsers)
+  if (navigator.share) {
+    navigator.share({
+      title: `Track Shipment ${shipmentId}`,
+      text: `Track package ${shipmentId} live on SAPAK Logistics:`,
+      url: shareUrl
+    }).then(() => {
+      showToast('Share menu opened!');
+    }).catch((err) => {
+      if (err.name !== 'AbortError') {
+        openShareModal(shipmentId, shareUrl, successMsg);
+      }
+    });
+    return;
+  }
+
+  // Fallback: Open Share Modal & copy to clipboard
+  openShareModal(shipmentId, shareUrl, successMsg);
+}
+
+function openShareModal(shipmentId, shareUrl, successMsg) {
+  copyToClipboard(shareUrl, successMsg);
+  
+  const modal = document.getElementById('modal-share-shipment');
+  const input = document.getElementById('share-modal-url-input');
+  const subtitle = document.getElementById('share-modal-subtitle');
+  const statusMsg = document.getElementById('share-modal-status-msg');
+  const btnCopy = document.getElementById('btn-share-modal-copy');
+  
+  if (subtitle) subtitle.textContent = `Tracking ID: ${shipmentId}`;
+  if (input) {
+    input.value = shareUrl;
+    setTimeout(() => { input.select(); }, 100);
+  }
+  if (statusMsg) {
+    statusMsg.style.display = 'block';
+    statusMsg.textContent = `✓ ${successMsg}`;
+  }
+  if (btnCopy) {
+    btnCopy.onclick = () => {
+      copyToClipboard(shareUrl, 'Link copied to clipboard!');
+      if (statusMsg) statusMsg.textContent = '✓ Link copied to clipboard!';
+    };
+  }
+  
+  modal?.classList.add('show');
+}
+
+

@@ -90,18 +90,62 @@ class TrackkApp {
   }
 
   handleHashChange() {
-    const hash = window.location.hash.replace('#', '').trim();
-    if (hash.startsWith('track/')) {
-      const id = hash.replace('track/', '');
-      this.switchView('detail', id);
-    } else if (hash === 'shipments') {
+    // 1. Extract payload 'd=' or 'data=' from location search or hash
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashStr = window.location.hash || '';
+    
+    let encodedData = searchParams.get('d') || searchParams.get('data');
+    if (!encodedData && hashStr.includes('?')) {
+      const hashQueryParams = new URLSearchParams(hashStr.substring(hashStr.indexOf('?')));
+      encodedData = hashQueryParams.get('d') || hashQueryParams.get('data');
+    }
+
+    if (encodedData) {
+      const imported = decodeShipmentData(encodedData);
+      if (imported && imported.id) {
+        store.importShipment(imported);
+      }
+    }
+
+    // 2. Extract tracking ID or route view name
+    let trackId = searchParams.get('track') || searchParams.get('id');
+    const cleanHash = hashStr.replace('#', '').trim();
+    const mainHashPart = cleanHash.split('?')[0];
+
+    if (!trackId && mainHashPart.startsWith('track/')) {
+      trackId = mainHashPart.replace('track/', '');
+    }
+
+    if (trackId) {
+      this.lookupAndSwitchView(trackId);
+    } else if (mainHashPart === 'shipments') {
       this.switchView('shipments');
-    } else if (hash === 'admin') {
+    } else if (mainHashPart === 'admin') {
       this.switchView('admin');
     } else {
       this.switchView('dashboard');
     }
   }
+
+  async lookupAndSwitchView(id) {
+    if (!id) {
+      this.switchView('dashboard');
+      return;
+    }
+    const cleanId = id.trim();
+    let found = store.getById(cleanId);
+    if (!found) {
+      showToast('Searching directory...', 'info');
+      found = await store.getByIdAsync(cleanId);
+    }
+    if (found) {
+      this.switchView('detail', found.id);
+    } else {
+      showToast(`No package found matching "${cleanId}"`, 'error');
+      this.switchView('dashboard');
+    }
+  }
+
 
   updateUserRoleBadge() {
     const roleEl = document.getElementById('sidebar-user-role');
@@ -204,15 +248,20 @@ class TrackkApp {
   setupDirectLookup() {
     const form = document.getElementById('form-direct-lookup');
     if (form) {
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = document.getElementById('direct-lookup-input');
         const code = (input?.value || '').trim();
         if (!code) return;
 
-        const found = store.getById(code);
+        let found = store.getById(code);
+        if (!found) {
+          showToast('Searching cloud directory...', 'info');
+          found = await store.getByIdAsync(code);
+        }
+
         if (found) {
-          input.value = '';
+          if (input) input.value = '';
           this.switchView('detail', found.id);
         } else {
           // Check for partial match
@@ -222,7 +271,7 @@ class TrackkApp {
             s.recipient.toLowerCase().includes(code.toLowerCase())
           );
           if (partial) {
-            input.value = '';
+            if (input) input.value = '';
             this.switchView('detail', partial.id);
           } else {
             showToast(`No package found matching "${code}"`, 'error');
@@ -231,6 +280,7 @@ class TrackkApp {
       });
     }
   }
+
 
   // ================= Customer Dashboard / Track Page =================
   renderDashboard() {
@@ -375,6 +425,9 @@ class TrackkApp {
         <td>${item.estDelivery || 'Pending'}</td>
         <td class="text-right">
           <div class="table-row-actions">
+            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); copyTrackingLink('${item.id}');" title="Copy shareable tracking link">
+              🔗 Share Link
+            </button>
             <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); app.switchView('detail', '${item.id}')">
               Track Route &rarr;
             </button>
@@ -385,8 +438,12 @@ class TrackkApp {
   }
 
   // ================= Public Shipment Detail & Map =================
-  renderDetailView(id) {
-    const shipment = store.getById(id);
+  async renderDetailView(id) {
+    let shipment = store.getById(id);
+    if (!shipment) {
+      shipment = await store.getByIdAsync(id);
+    }
+
     if (!shipment) {
       showToast('Shipment not found', 'error');
       this.switchView('shipments');
@@ -433,7 +490,14 @@ class TrackkApp {
     if (btnCopy) {
       btnCopy.onclick = () => copyToClipboard(shipment.id);
     }
+
+    // Detail Share Link button
+    const btnShareLink = document.getElementById('btn-detail-share-link');
+    if (btnShareLink) {
+      btnShareLink.onclick = () => copyTrackingLink(shipment.id);
+    }
   }
+
 
   renderTimelineStepper(shipment) {
     const container = document.getElementById('detail-timeline-steps');
@@ -667,6 +731,9 @@ class TrackkApp {
           </td>
           <td class="text-right">
             <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+              <button class="btn btn-sm btn-outline" onclick="copyTrackingLink('${item.id}');" title="Copy shareable tracking link">
+                🔗 Share
+              </button>
               <button class="btn btn-sm btn-outline" onclick="app.switchView('detail', '${item.id}')" title="View Customer Map">
                 👁️ Map
               </button>
@@ -682,6 +749,7 @@ class TrackkApp {
             </div>
           </td>
         </tr>
+
       `;
     }).join('');
   }
@@ -792,6 +860,10 @@ class TrackkApp {
     document.getElementById('modal-pause-close-btn')?.addEventListener('click', () => this.closeAllModals());
     document.getElementById('btn-cancel-pause-modal')?.addEventListener('click', () => this.closeAllModals());
 
+    // Share Modal
+    document.getElementById('modal-share-close-btn')?.addEventListener('click', () => this.closeAllModals());
+    document.getElementById('btn-close-share-modal')?.addEventListener('click', () => this.closeAllModals());
+
     // Close on backdrop click
     document.querySelectorAll('.modal-backdrop').forEach(modal => {
       modal?.addEventListener('click', (e) => {
@@ -799,6 +871,7 @@ class TrackkApp {
       });
     });
   }
+
 
   openNewShipmentModal() {
     const modal = document.getElementById('modal-new-shipment');

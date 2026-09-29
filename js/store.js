@@ -1,4 +1,4 @@
-﻿// Trackk â€” LocalStorage Data Layer & Sample Data
+// Trackk â€” LocalStorage Data Layer & Sample Data
 
 const STORAGE_KEY = 'sapak_shipments_v3';
 
@@ -307,6 +307,7 @@ class ShipmentStore {
 
     list.unshift(newShipment);
     this.saveAll(list);
+    this.syncToCloud(newShipment);
     return newShipment;
   }
 
@@ -327,6 +328,7 @@ class ShipmentStore {
     }
 
     this.saveAll(list);
+    this.syncToCloud(list[index]);
     return list[index];
   }
 
@@ -340,12 +342,67 @@ class ShipmentStore {
     if (checkpoint.location) item.currentLocation = checkpoint.location;
 
     this.saveAll(list);
+    this.syncToCloud(item);
     return item;
   }
 
   delete(id) {
     const list = this.getAll().filter(s => s.id.toLowerCase() !== id.toLowerCase());
     this.saveAll(list);
+  }
+
+  importShipment(shipmentData) {
+    if (!shipmentData || !shipmentData.id) return null;
+    const list = this.getAll();
+    const index = list.findIndex(s => s.id.toLowerCase() === shipmentData.id.toLowerCase());
+    
+    if (index >= 0) {
+      list[index] = { ...list[index], ...shipmentData };
+    } else {
+      list.unshift(shipmentData);
+    }
+    
+    this.saveAll(list);
+    return shipmentData;
+  }
+
+  async getByIdAsync(id) {
+    if (!id) return null;
+    const local = this.getById(id);
+    if (local) return local;
+
+    try {
+      const res = await fetch('https://api.restful-api.dev/objects');
+      if (res.ok) {
+        const list = await res.json();
+        const match = list.find(item => 
+          item && item.data && item.data.id && item.data.id.toLowerCase() === id.toLowerCase() ||
+          item && item.name && item.name.toLowerCase() === id.toLowerCase()
+        );
+        if (match && match.data && match.data.id) {
+          return this.importShipment(match.data);
+        }
+      }
+    } catch (e) {
+      console.warn("Cloud fetch error:", e);
+    }
+    return null;
+  }
+
+  async syncToCloud(shipment) {
+    if (!shipment || !shipment.id) return;
+    try {
+      await fetch('https://api.restful-api.dev/objects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: shipment.id.toUpperCase(),
+          data: shipment
+        })
+      });
+    } catch (e) {
+      console.warn("Cloud sync error:", e);
+    }
   }
 
   resetSampleData() {
@@ -372,3 +429,4 @@ class ShipmentStore {
 
 // Global store instance
 const store = new ShipmentStore();
+
