@@ -372,15 +372,14 @@ class ShipmentStore {
     if (local) return local;
 
     try {
-      const res = await fetch('https://api.restful-api.dev/objects');
+      const res = await fetch('https://crudcrud.com/api/75c68093b495418d9b5228e9f4a3128f/shipments');
       if (res.ok) {
         const list = await res.json();
         const match = list.find(item => 
-          item && item.data && item.data.id && item.data.id.toLowerCase() === id.toLowerCase() ||
-          item && item.name && item.name.toLowerCase() === id.toLowerCase()
+          item && item.id && item.id.toLowerCase() === id.toLowerCase()
         );
-        if (match && match.data && match.data.id) {
-          return this.importShipment(match.data);
+        if (match) {
+          return this.importShipment(match);
         }
       }
     } catch (e) {
@@ -392,18 +391,16 @@ class ShipmentStore {
   async syncToCloud(shipment) {
     if (!shipment || !shipment.id) return;
     try {
-      await fetch('https://api.restful-api.dev/objects', {
+      await fetch('https://crudcrud.com/api/75c68093b495418d9b5228e9f4a3128f/shipments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: shipment.id.toUpperCase(),
-          data: shipment
-        })
+        body: JSON.stringify(shipment)
       });
     } catch (e) {
       console.warn("Cloud sync error:", e);
     }
   }
+
 
   resetSampleData() {
     this.saveAll(INITIAL_SAMPLE_SHIPMENTS);
