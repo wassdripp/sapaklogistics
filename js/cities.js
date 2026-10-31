@@ -33,6 +33,7 @@ const WORLD_CITIES = [
   { name: "Miami, USA", lat: 25.7617, lng: -80.1918, country: "United States" },
   { name: "Seattle, USA", lat: 47.6062, lng: -122.3321, country: "United States" },
   { name: "Houston, USA", lat: 29.7604, lng: -95.3698, country: "United States" },
+  { name: "Denver, USA", lat: 39.7392, lng: -104.9903, country: "United States" },
   { name: "Dublin, Ireland", lat: 53.3498, lng: -6.2603, country: "Ireland" },
   { name: "Zurich, Switzerland", lat: 47.3769, lng: 8.5417, country: "Switzerland" }
 ];
