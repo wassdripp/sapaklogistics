@@ -1,6 +1,8 @@
 // Trackk â€” LocalStorage Data Layer & Sample Data
 
 const STORAGE_KEY = 'sapak_shipments_v3';
+const FIREBASE_CONFIG_KEY = 'sapak_firebase_url';
+let DEFAULT_FIREBASE_URL = 'https://sapak-logistics-default-rtdb.firebaseio.com';
 
 const INITIAL_SAMPLE_SHIPMENTS = [
   {
@@ -366,33 +368,81 @@ class ShipmentStore {
     return shipmentData;
   }
 
-  async getByIdAsync(id) {
-    if (!id) return null;
-    const local = this.getById(id);
-    if (local) return local;
+  getCloudDbUrl() {
+    return localStorage.getItem(FIREBASE_CONFIG_KEY) || DEFAULT_FIREBASE_URL || '';
+  }
+
+  setCloudDbUrl(url) {
+    if (url) {
+      localStorage.setItem(FIREBASE_CONFIG_KEY, url.trim().replace(/\/+$/, ''));
+    } else {
+      localStorage.removeItem(FIREBASE_CONFIG_KEY);
+    }
+    this.syncFromCloud();
+  }
+
+  async syncFromCloud() {
+    const dbUrl = this.getCloudDbUrl();
+    if (!dbUrl) return;
 
     try {
-      const res = await fetch('https://crudcrud.com/api/75c68093b495418d9b5228e9f4a3128f/shipments');
+      const res = await fetch(`${dbUrl}/shipments.json`);
       if (res.ok) {
-        const list = await res.json();
-        const match = list.find(item => 
-          item && item.id && item.id.toLowerCase() === id.toLowerCase()
-        );
-        if (match) {
-          return this.importShipment(match);
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          const list = this.getAll();
+          let changed = false;
+          Object.values(data).forEach(cloudItem => {
+            if (!cloudItem || !cloudItem.id) return;
+            const index = list.findIndex(s => s.id.toLowerCase() === cloudItem.id.toLowerCase());
+            if (index >= 0) {
+              list[index] = { ...list[index], ...cloudItem };
+            } else {
+              list.unshift(cloudItem);
+              changed = true;
+            }
+          });
+          if (changed) {
+            this.saveAll(list);
+          }
         }
       }
     } catch (e) {
-      console.warn("Cloud fetch error:", e);
+      console.warn("Cloud sync error:", e);
+    }
+  }
+
+  async getByIdAsync(id) {
+    if (!id) return null;
+    const cleanId = id.trim().toLowerCase();
+    const local = this.getById(cleanId);
+    if (local) return local;
+
+    const dbUrl = this.getCloudDbUrl();
+    if (dbUrl) {
+      try {
+        const res = await fetch(`${dbUrl}/shipments/${id.toUpperCase()}.json`);
+        if (res.ok) {
+          const item = await res.json();
+          if (item && item.id) {
+            return this.importShipment(item);
+          }
+        }
+      } catch (e) {
+        console.warn("Cloud fetch error:", e);
+      }
     }
     return null;
   }
 
   async syncToCloud(shipment) {
     if (!shipment || !shipment.id) return;
+    const dbUrl = this.getCloudDbUrl();
+    if (!dbUrl) return;
+
     try {
-      await fetch('https://crudcrud.com/api/75c68093b495418d9b5228e9f4a3128f/shipments', {
-        method: 'POST',
+      await fetch(`${dbUrl}/shipments/${shipment.id.toUpperCase()}.json`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(shipment)
       });
@@ -401,6 +451,19 @@ class ShipmentStore {
     }
   }
 
+  async deleteFromCloud(id) {
+    if (!id) return;
+    const dbUrl = this.getCloudDbUrl();
+    if (!dbUrl) return;
+
+    try {
+      await fetch(`${dbUrl}/shipments/${id.toUpperCase()}.json`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn("Cloud delete error:", e);
+    }
+  }
 
   resetSampleData() {
     this.saveAll(INITIAL_SAMPLE_SHIPMENTS);
