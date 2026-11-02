@@ -246,6 +246,7 @@ class ShipmentStore {
     if (!localStorage.getItem(this.storageKey)) {
       this.saveAll(INITIAL_SAMPLE_SHIPMENTS);
     }
+    this.syncFromCloud();
   }
 
   getAll() {
@@ -351,6 +352,7 @@ class ShipmentStore {
   delete(id) {
     const list = this.getAll().filter(s => s.id.toLowerCase() !== id.toLowerCase());
     this.saveAll(list);
+    this.deleteFromCloud(id);
   }
 
   importShipment(shipmentData) {
@@ -369,7 +371,11 @@ class ShipmentStore {
   }
 
   getCloudDbUrl() {
-    return localStorage.getItem(FIREBASE_CONFIG_KEY) || DEFAULT_FIREBASE_URL || '';
+    const custom = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    if (custom && custom.startsWith('http') && custom.includes('firebaseio.com')) {
+      return custom.trim().replace(/\/+$/, '');
+    }
+    return DEFAULT_FIREBASE_URL.replace(/\/+$/, '');
   }
 
   setCloudDbUrl(url) {
@@ -389,9 +395,10 @@ class ShipmentStore {
       const res = await fetch(`${dbUrl}/shipments.json`);
       if (res.ok) {
         const data = await res.json();
+        const list = this.getAll();
+        let changed = false;
+
         if (data && typeof data === 'object') {
-          const list = this.getAll();
-          let changed = false;
           Object.values(data).forEach(cloudItem => {
             if (!cloudItem || !cloudItem.id) return;
             const index = list.findIndex(s => s.id.toLowerCase() === cloudItem.id.toLowerCase());
@@ -402,9 +409,20 @@ class ShipmentStore {
               changed = true;
             }
           });
-          if (changed) {
-            this.saveAll(list);
+        }
+
+        // Push any local custom shipments missing in cloud
+        const cloudKeys = data && typeof data === 'object'
+          ? Object.keys(data).map(k => k.toLowerCase())
+          : [];
+        for (const localItem of list) {
+          if (localItem && localItem.id && !cloudKeys.includes(localItem.id.toLowerCase())) {
+            this.syncToCloud(localItem);
           }
+        }
+
+        if (changed) {
+          this.saveAll(list);
         }
       }
     } catch (e) {
@@ -414,24 +432,60 @@ class ShipmentStore {
 
   async getByIdAsync(id) {
     if (!id) return null;
-    const cleanId = id.trim().toLowerCase();
+    const cleanId = id.trim();
+    if (!cleanId) return null;
+
+    // 1. Direct local lookup
     const local = this.getById(cleanId);
     if (local) return local;
 
     const dbUrl = this.getCloudDbUrl();
-    if (dbUrl) {
-      try {
-        const res = await fetch(`${dbUrl}/shipments/${id.toUpperCase()}.json`);
-        if (res.ok) {
-          const item = await res.json();
-          if (item && item.id) {
-            return this.importShipment(item);
+    if (!dbUrl) return null;
+
+    const cleanUpper = cleanId.toUpperCase();
+
+    // 2. Direct lookup by key in Firebase
+    try {
+      const res = await fetch(`${dbUrl}/shipments/${encodeURIComponent(cleanUpper)}.json`);
+      if (res.ok) {
+        const item = await res.json();
+        if (item && item.id) {
+          return this.importShipment(item);
+        }
+      }
+    } catch (e) {
+      console.warn("Direct cloud fetch error:", e);
+    }
+
+    // 3. Resilient fallback search across all shipments in Firebase
+    try {
+      const res = await fetch(`${dbUrl}/shipments.json`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          const list = Object.values(data).filter(Boolean);
+          const normalizedQuery = cleanId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+          const match = list.find(s => {
+            if (!s || !s.id) return false;
+            const normId = s.id.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            return (
+              s.id.toLowerCase() === cleanId.toLowerCase() ||
+              normId === normalizedQuery ||
+              (normalizedQuery.length >= 4 && normId.includes(normalizedQuery)) ||
+              (s.recipient && s.recipient.toLowerCase().includes(cleanId.toLowerCase()))
+            );
+          });
+
+          if (match && match.id) {
+            return this.importShipment(match);
           }
         }
-      } catch (e) {
-        console.warn("Cloud fetch error:", e);
       }
+    } catch (e) {
+      console.warn("Cloud search fallback error:", e);
     }
+
     return null;
   }
 
@@ -441,7 +495,7 @@ class ShipmentStore {
     if (!dbUrl) return;
 
     try {
-      await fetch(`${dbUrl}/shipments/${shipment.id.toUpperCase()}.json`, {
+      await fetch(`${dbUrl}/shipments/${encodeURIComponent(shipment.id.trim().toUpperCase())}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(shipment)
@@ -457,7 +511,7 @@ class ShipmentStore {
     if (!dbUrl) return;
 
     try {
-      await fetch(`${dbUrl}/shipments/${id.toUpperCase()}.json`, {
+      await fetch(`${dbUrl}/shipments/${encodeURIComponent(id.trim().toUpperCase())}.json`, {
         method: 'DELETE'
       });
     } catch (e) {

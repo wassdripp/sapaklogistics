@@ -241,6 +241,16 @@ class TrackkApp {
           this.renderShipmentsTable();
         }
       });
+
+      globalSearch.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = (globalSearch.value || '').trim();
+          if (val) {
+            this.lookupAndSwitchView(val);
+          }
+        }
+      });
     }
   }
 
@@ -772,7 +782,7 @@ class TrackkApp {
     cancelNewBtn?.addEventListener('click', () => this.closeAllModals());
 
     // Submit New Shipment (Admin)
-    formNew?.addEventListener('submit', (e) => {
+    formNew?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const trackingId = document.getElementById('input-tracking-id').value.trim();
       const recipient = document.getElementById('input-recipient').value.trim();
@@ -808,6 +818,9 @@ class TrackkApp {
         weight: weight || '2.0 kg',
         notes: notes || 'Standard parcel service'
       });
+
+      // Synchronize directly with Firebase
+      await store.syncToCloud(created);
 
       this.closeAllModals();
       showToast(`Shipment ${created.id} registered!`);
