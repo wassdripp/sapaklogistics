@@ -163,6 +163,7 @@ class TrackkApp {
     const roleEl = document.getElementById('sidebar-user-role');
     const avatarEl = document.getElementById('sidebar-user-avatar');
     const topAdminBtn = document.getElementById('top-admin-btn-label');
+    const topAdminToggle = document.getElementById('btn-top-admin-toggle');
     const navShipments = document.getElementById('nav-shipments');
     const navAdmin = document.getElementById('nav-admin');
 
@@ -171,8 +172,10 @@ class TrackkApp {
       if (roleEl) roleEl.textContent = 'Fleet Administrator';
       if (avatarEl) avatarEl.textContent = 'ADM';
       if (topAdminBtn) topAdminBtn.textContent = 'Log Out';
+      if (topAdminToggle) topAdminToggle.style.display = 'inline-flex';
       if (navShipments) navShipments.style.display = 'flex';
       if (navAdmin) {
+        navAdmin.style.display = 'flex';
         const span = navAdmin.querySelector('span');
         if (span) span.textContent = 'Fleet Dispatch';
       }
@@ -180,12 +183,9 @@ class TrackkApp {
       document.body.classList.remove('is-admin');
       if (roleEl) roleEl.textContent = 'Secure Tracking Portal';
       if (avatarEl) avatarEl.textContent = 'LG';
-      if (topAdminBtn) topAdminBtn.textContent = 'Admin Login';
+      if (topAdminToggle) topAdminToggle.style.display = 'none';
       if (navShipments) navShipments.style.display = 'none';
-      if (navAdmin) {
-        const span = navAdmin.querySelector('span');
-        if (span) span.textContent = 'Admin Login';
-      }
+      if (navAdmin) navAdmin.style.display = 'none';
     }
   }
 
@@ -246,6 +246,12 @@ class TrackkApp {
   setupKeyboardShortcuts() {
     window.addEventListener('keydown', (e) => {
       // ⌘K or Ctrl+K for search focus
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        this.switchView('admin');
+        return;
+      }
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         const globalSearch = document.getElementById('global-search-input');
