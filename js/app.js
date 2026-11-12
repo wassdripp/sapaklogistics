@@ -167,15 +167,17 @@ class TrackkApp {
     const navAdmin = document.getElementById('nav-admin');
 
     if (this.isAdmin) {
+      document.body.classList.add('is-admin');
       if (roleEl) roleEl.textContent = 'Fleet Administrator';
       if (avatarEl) avatarEl.textContent = 'ADM';
-      if (topAdminBtn) topAdminBtn.textContent = 'Admin Mode';
+      if (topAdminBtn) topAdminBtn.textContent = 'Log Out';
       if (navShipments) navShipments.style.display = 'flex';
       if (navAdmin) {
         const span = navAdmin.querySelector('span');
         if (span) span.textContent = 'Fleet Dispatch';
       }
     } else {
+      document.body.classList.remove('is-admin');
       if (roleEl) roleEl.textContent = 'Secure Tracking Portal';
       if (avatarEl) avatarEl.textContent = 'LG';
       if (topAdminBtn) topAdminBtn.textContent = 'Admin Login';
@@ -206,7 +208,13 @@ class TrackkApp {
     document.getElementById('nav-dashboard')?.addEventListener('click', () => this.switchView('dashboard'));
     document.getElementById('nav-shipments')?.addEventListener('click', () => this.switchView('shipments'));
     document.getElementById('nav-admin')?.addEventListener('click', () => this.switchView('admin'));
-    document.getElementById('btn-top-admin-toggle')?.addEventListener('click', () => this.switchView('admin'));
+    document.getElementById('btn-top-admin-toggle')?.addEventListener('click', () => {
+      if (this.isAdmin) {
+        this.logoutAdmin();
+      } else {
+        this.switchView('admin');
+      }
+    });
 
     // Back button in detail view (takes regular users back to tracking dashboard, admins back to shipments)
     document.getElementById('btn-back-to-list')?.addEventListener('click', () => {
@@ -603,6 +611,16 @@ class TrackkApp {
   }
 
   // ================= ADMIN PORTAL =================
+  
+  logoutAdmin() {
+    this.isAdmin = false;
+    sessionStorage.removeItem('sapak_admin_auth');
+    document.body.classList.remove('is-admin');
+    showToast('Admin session locked. Returned to tracking portal.');
+    this.updateUserRoleBadge();
+    this.switchView('dashboard');
+  }
+
   setupAdminFeatures() {
     // Admin Login Form
     const loginForm = document.getElementById('form-admin-login');
@@ -622,11 +640,7 @@ class TrackkApp {
 
     // Admin Logout
     document.getElementById('btn-admin-logout')?.addEventListener('click', () => {
-      this.isAdmin = false;
-      sessionStorage.removeItem('sapak_admin_auth');
-      showToast('Logged out of Admin Portal');
-      this.updateUserRoleBadge();
-      this.switchView('dashboard');
+      this.logoutAdmin();
     });
 
     // Admin Create button

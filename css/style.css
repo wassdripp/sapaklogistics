@@ -2112,3 +2112,13 @@ button, input, select, textarea {
   color: var(--text-secondary);
   line-height: 1.45;
 }
+
+
+/* Admin Only Navigation Guard */
+.admin-only-nav {
+  display: none !important;
+}
+
+body.is-admin .admin-only-nav {
+  display: flex !important;
+}
