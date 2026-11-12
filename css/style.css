@@ -5,28 +5,43 @@
 
 :root {
   /* Color Palette */
-  --bg-page: #F7F6F2;
+  /* Link Guard Security Official Logo Palette */
+  --bg-page: #F4F6F9;
   --bg-card: #FFFFFF;
-  --bg-subtle: #EFEFE9;
-  --bg-hover: #F2F1EC;
+  --bg-subtle: #EEF2F6;
+  --bg-hover: #E2E8F0;
   
-  --sidebar-bg: #1B2228;
-  --sidebar-border: #2A333C;
-  --sidebar-text: #D2D8DF;
-  --sidebar-muted: #8893A0;
-  --sidebar-active-bg: #29343E;
+  --sidebar-bg: #101B2B;
+  --sidebar-border: #1E2D44;
+  --sidebar-text: #E2E8F0;
+  --sidebar-muted: #8B9BB0;
+  --sidebar-active-bg: #1B2B43;
 
-  --accent-terracotta: #D96B4E;
-  --accent-terracotta-hover: #C5573B;
-  --accent-terracotta-subtle: #FBECE8;
-  --accent-terracotta-border: #F3C7BC;
+  /* Security Gold Accent from Logo */
+  --accent-gold: #DDA238;
+  --accent-gold-hover: #C68F2C;
+  --accent-gold-subtle: #FEF7EA;
+  --accent-gold-border: #F6DFB6;
 
-  --text-primary: #1C2024;
-  --text-secondary: #586069;
-  --text-muted: #8A929B;
+  /* Primary Accent Mapping */
+  --accent-terracotta: #DDA238;
+  --accent-terracotta-hover: #C68F2C;
+  --accent-terracotta-subtle: #FEF7EA;
+  --accent-terracotta-border: #F6DFB6;
 
-  --border-light: #E2E1DA;
-  --border-darker: #CECCC2;
+  /* Core Brand Tokens */
+  --brand-navy: #132238;
+  --brand-navy-dark: #0A1422;
+  --brand-navy-light: #1D304E;
+  --brand-gold: #DDA238;
+  --brand-slate: #48566A;
+
+  --text-primary: #132238;
+  --text-secondary: #48566A;
+  --text-muted: #8492A6;
+
+  --border-light: #E2E8F0;
+  --border-darker: #CBD5E1;
 
   /* Status Colors */
   --status-transit-bg: #E3F2FD;
@@ -149,60 +164,52 @@ button, input, select, textarea {
 .brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 12px 14px 22px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  justify-content: center;
+  padding: 14px 10px 18px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 20px;
 }
 
-.brand-logo-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.brand-link {
+  display: block;
   text-decoration: none;
-  cursor: pointer;
-  user-select: none;
-}
-
-.brand-icon-shield {
-  color: var(--accent-terracotta);
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 8px rgba(199, 81, 44, 0.5));
-}
-
-.brand-text-block {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.brand-name-main {
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #ffffff;
-}
-
-.brand-name-sub {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--accent-terracotta);
-  text-transform: uppercase;
+  width: 100%;
+  text-align: center;
 }
 
 .brand-logo-img {
-  width: 160px;
+  width: 100%;
+  max-width: 195px;
   height: auto;
-  max-height: 48px;
+  max-height: 78px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
-  transition: filter var(--transition-smooth), transform var(--transition-smooth);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  padding: 8px 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .brand-logo-img:hover {
-  filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38);
+}
+
+.mobile-brand-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.mobile-brand-logo-img {
+  height: 34px;
+  width: auto;
+  max-width: 130px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #FFFFFF;
+  padding: 2px 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Navigation items */
@@ -237,7 +244,7 @@ button, input, select, textarea {
 
 .nav-item.active {
   background-color: var(--sidebar-active-bg);
-  border-color: rgba(217, 107, 78, 0.4);
+  border-color: rgba(221, 162, 56, 0.4);
   color: #FFFFFF;
   font-weight: 600;
 }
@@ -264,8 +271,8 @@ button, input, select, textarea {
 
 .btn-nav-admin {
   color: #FFB3A1 !important;
-  border: 1px solid rgba(217, 107, 78, 0.3) !important;
-  background: rgba(217, 107, 78, 0.08) !important;
+  border: 1px solid rgba(221, 162, 56, 0.3) !important;
+  background: rgba(221, 162, 56, 0.08) !important;
   margin-top: 10px;
 }
 
@@ -495,14 +502,17 @@ button, input, select, textarea {
 }
 
 .btn-terracotta {
-  background-color: var(--accent-terracotta);
-  color: #FFFFFF;
-  box-shadow: 0 1px 3px rgba(217, 107, 78, 0.3);
+  background: linear-gradient(135deg, #E5A93C 0%, #D4931E 100%);
+  color: #0E1A2C !important;
+  font-weight: 700;
+  border: 1px solid #C68F2C;
+  box-shadow: 0 2px 8px rgba(221, 162, 56, 0.35);
 }
 
 .btn-terracotta:hover {
-  background-color: var(--accent-terracotta-hover);
-  box-shadow: 0 3px 8px rgba(217, 107, 78, 0.35);
+  background: linear-gradient(135deg, #EDB348 0%, #DC9B26 100%);
+  color: #08111D !important;
+  box-shadow: 0 4px 14px rgba(221, 162, 56, 0.48);
   transform: translateY(-1px);
 }
 
@@ -1165,7 +1175,7 @@ button, input, select, textarea {
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #D96B4E, #FF9F87);
+  background: linear-gradient(90deg, #DDA238, #F5CF85);
   border-radius: var(--radius-pill);
   transition: width 600ms ease;
 }
@@ -1323,14 +1333,14 @@ button, input, select, textarea {
   border: 3px solid #FFFFFF;
   border-radius: 50%;
   color: #FFFFFF;
-  box-shadow: 0 4px 10px rgba(217, 107, 78, 0.4);
+  box-shadow: 0 4px 10px rgba(221, 162, 56, 0.4);
   animation: pulse-truck 1.8s infinite;
 }
 
 @keyframes pulse-truck {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 107, 78, 0.6); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(217, 107, 78, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 107, 78, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(221, 162, 56, 0.6); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(221, 162, 56, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(221, 162, 56, 0); }
 }
 
 /* Detail Grid Specs */
@@ -1514,8 +1524,8 @@ button, input, select, textarea {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(217, 107, 78, 0.15);
-  border: 1px solid rgba(217, 107, 78, 0.35);
+  background: rgba(221, 162, 56, 0.15);
+  border: 1px solid rgba(221, 162, 56, 0.35);
   color: var(--accent-terracotta);
   padding: 2px 8px;
   border-radius: var(--radius-sm);

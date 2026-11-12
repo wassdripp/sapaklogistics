@@ -135,7 +135,7 @@ class ShipmentMapManager {
 
     // 4. Render Dotted Terracotta Polyline
     this.routePolyline = L.polyline(routePoints, {
-      color: '#D96B4E',
+      color: '#DDA238',
       weight: 3.5,
       dashArray: '6, 8',
       opacity: 0.9,
@@ -223,7 +223,7 @@ class ShipmentMapManager {
   renderFallbackSvgMap(container) {
     container.innerHTML = `
       <div style="height: 100%; display: grid; place-items: center; background: #EEF0EC; color: #555; text-align: center; padding: 20px;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D96B4E" stroke-width="2">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DDA238" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
