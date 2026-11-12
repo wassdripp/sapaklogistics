@@ -43,6 +43,13 @@ class TrackkApp {
 
   // ================= Routing & View Switching =================
   switchView(viewName, shipmentId = null) {
+    // Route protection: Only authenticated admins can browse the full shipments directory
+    if (viewName === 'shipments' && !this.isAdmin) {
+      showToast('Administrator authentication required to access shipments directory.', 'info');
+      this.switchView('admin');
+      return;
+    }
+
     this.currentView = viewName;
 
     // Update active nav buttons
@@ -119,7 +126,11 @@ class TrackkApp {
     if (trackId) {
       this.lookupAndSwitchView(trackId);
     } else if (mainHashPart === 'shipments') {
-      this.switchView('shipments');
+      if (!this.isAdmin) {
+        this.switchView('admin');
+      } else {
+        this.switchView('shipments');
+      }
     } else if (mainHashPart === 'admin') {
       this.switchView('admin');
     } else {
@@ -139,6 +150,7 @@ class TrackkApp {
       found = await store.getByIdAsync(cleanId);
     }
     if (found) {
+      this.saveRecentUserLookup(found.id);
       this.switchView('detail', found.id);
     } else {
       showToast(`No package found matching "${cleanId}"`, 'error');
@@ -151,15 +163,27 @@ class TrackkApp {
     const roleEl = document.getElementById('sidebar-user-role');
     const avatarEl = document.getElementById('sidebar-user-avatar');
     const topAdminBtn = document.getElementById('top-admin-btn-label');
+    const navShipments = document.getElementById('nav-shipments');
+    const navAdmin = document.getElementById('nav-admin');
 
     if (this.isAdmin) {
       if (roleEl) roleEl.textContent = 'Fleet Administrator';
       if (avatarEl) avatarEl.textContent = 'ADM';
       if (topAdminBtn) topAdminBtn.textContent = 'Admin Mode';
+      if (navShipments) navShipments.style.display = 'flex';
+      if (navAdmin) {
+        const span = navAdmin.querySelector('span');
+        if (span) span.textContent = 'Fleet Dispatch';
+      }
     } else {
       if (roleEl) roleEl.textContent = 'Secure Tracking Portal';
       if (avatarEl) avatarEl.textContent = 'LG';
-      if (topAdminBtn) topAdminBtn.textContent = 'Admin Portal';
+      if (topAdminBtn) topAdminBtn.textContent = 'Admin Login';
+      if (navShipments) navShipments.style.display = 'none';
+      if (navAdmin) {
+        const span = navAdmin.querySelector('span');
+        if (span) span.textContent = 'Admin Login';
+      }
     }
   }
 
@@ -184,8 +208,10 @@ class TrackkApp {
     document.getElementById('nav-admin')?.addEventListener('click', () => this.switchView('admin'));
     document.getElementById('btn-top-admin-toggle')?.addEventListener('click', () => this.switchView('admin'));
 
-    // Back button in detail view
-    document.getElementById('btn-back-to-list')?.addEventListener('click', () => this.switchView('shipments'));
+    // Back button in detail view (takes regular users back to tracking dashboard, admins back to shipments)
+    document.getElementById('btn-back-to-list')?.addEventListener('click', () => {
+      this.switchView(this.isAdmin ? 'shipments' : 'dashboard');
+    });
 
     // Mobile sidebar toggle & backdrop
     const sidebar = document.getElementById('sidebar');
@@ -271,6 +297,7 @@ class TrackkApp {
         }
 
         if (found) {
+          this.saveRecentUserLookup(found.id);
           if (input) input.value = '';
           this.switchView('detail', found.id);
         } else {
@@ -281,6 +308,7 @@ class TrackkApp {
             s.recipient.toLowerCase().includes(code.toLowerCase())
           );
           if (partial) {
+            this.saveRecentUserLookup(partial.id);
             if (input) input.value = '';
             this.switchView('detail', partial.id);
           } else {
@@ -294,23 +322,29 @@ class TrackkApp {
 
   // ================= Customer Dashboard / Track Page =================
   renderDashboard() {
-    const shipments = store.getAll();
+    const userRecentSection = document.getElementById('user-recent-section');
+    const userRecentGrid = document.getElementById('user-recent-grid');
+    if (!userRecentSection || !userRecentGrid) return;
 
-    // Render shipment cards grid
-    const grid = document.getElementById('recent-tracked-grid');
-    if (!grid) return;
+    // Retrieve only the tracking numbers queried on this browser
+    const recentIds = this.getRecentUserLookups();
 
-    if (!shipments.length) {
-      grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: var(--text-muted);">
-          <p style="font-size: 1.1rem; margin-bottom: 6px;">No active shipments recorded</p>
-          <p style="font-size: 0.88rem;">Track any parcel by entering its tracking ID in the search bar above.</p>
-        </div>
-      `;
+    if (!recentIds.length) {
+      userRecentSection.style.display = 'none';
       return;
     }
 
-    grid.innerHTML = shipments.map(item => `
+    const matchedItems = recentIds
+      .map(id => store.getById(id))
+      .filter(Boolean);
+
+    if (!matchedItems.length) {
+      userRecentSection.style.display = 'none';
+      return;
+    }
+
+    userRecentSection.style.display = 'block';
+    userRecentGrid.innerHTML = matchedItems.map(item => `
       <div class="tracked-card" onclick="app.switchView('detail', '${item.id}')">
         <div class="tracked-card-top">
           <span class="tracked-card-id">${item.id}</span>
@@ -329,6 +363,26 @@ class TrackkApp {
         </div>
       </div>
     `).join('');
+  }
+
+  getRecentUserLookups() {
+    try {
+      const data = localStorage.getItem('lgs_user_recent');
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveRecentUserLookup(id) {
+    if (!id) return;
+    try {
+      let recent = this.getRecentUserLookups();
+      recent = recent.filter(x => x.toLowerCase() !== id.toLowerCase());
+      recent.unshift(id.toUpperCase());
+      if (recent.length > 3) recent = recent.slice(0, 3);
+      localStorage.setItem('lgs_user_recent', JSON.stringify(recent));
+    } catch (e) {}
   }
 
   // ================= Customer Shipments Directory =================
@@ -456,8 +510,13 @@ class TrackkApp {
 
     if (!shipment) {
       showToast('Shipment not found', 'error');
-      this.switchView('shipments');
+      this.switchView(this.isAdmin ? 'shipments' : 'dashboard');
       return;
+    }
+
+    const backBtnSpan = document.querySelector('#btn-back-to-list span');
+    if (backBtnSpan) {
+      backBtnSpan.textContent = this.isAdmin ? 'Back to Shipments' : 'Back to Track Package';
     }
 
     // Hero details
@@ -555,7 +614,7 @@ class TrackkApp {
         sessionStorage.setItem('sapak_admin_auth', 'true');
         showToast('Admin access granted');
         this.updateUserRoleBadge();
-        this.renderAdminView();
+        this.switchView('admin');
       } else {
         showToast('Invalid administrator passcode', 'error');
       }
@@ -567,7 +626,7 @@ class TrackkApp {
       sessionStorage.removeItem('sapak_admin_auth');
       showToast('Logged out of Admin Portal');
       this.updateUserRoleBadge();
-      this.renderAdminView();
+      this.switchView('dashboard');
     });
 
     // Admin Create button

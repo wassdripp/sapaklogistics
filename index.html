@@ -151,16 +151,80 @@
             </div>
           </div>
 
-          <!-- Public Tracked Shipments Cards Grid -->
-          <div class="recent-tracked-section">
+          <!-- User's Own Recent Lookups (Only shown if queried on this device) -->
+          <div class="user-recent-section" id="user-recent-section" style="display: none;">
             <div class="card-header">
               <div>
-                <h3 class="recent-tracked-title">Active Logistics Directory</h3>
-                <p class="card-subtitle">Click any cargo shipment to view live GPS route and checkpoint history</p>
+                <h3 class="recent-tracked-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Recently Tracked On This Device</span>
+                </h3>
+                <p class="card-subtitle">Quick access to shipments you have recently queried</p>
               </div>
             </div>
-            <div class="recent-tracked-grid" id="recent-tracked-grid">
-              <!-- Populated dynamically -->
+            <div class="recent-tracked-grid" id="user-recent-grid">
+              <!-- Dynamically populated only with current user's lookups -->
+            </div>
+          </div>
+
+          <!-- Security & Courier Protection Features (Public Trust Section) -->
+          <div class="features-section">
+            <div class="features-header">
+              <span class="features-badge">Link Guard Protection Protocol</span>
+              <h2 class="features-title">High-Security Logistics & Chain of Custody</h2>
+              <p class="features-subtitle">Every consignment entrusted to Link Guard Security Company is protected under strict biometric custody, real-time GPS telemetry, and encrypted dispatch.</p>
+            </div>
+
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon-box">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
+                </div>
+                <h4 class="feature-name">Armored Custody Handover</h4>
+                <p class="feature-desc">Tamper-evident seals and digital signature verification at every transit checkpoint.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-box">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m4.93 4.93 4.24 4.24"/>
+                    <path d="m14.83 9.17 4.24-4.24"/>
+                    <path d="m14.83 14.83 4.24 4.24"/>
+                    <path d="m9.17 14.83-4.24 4.24"/>
+                    <circle cx="12" cy="12" r="4"/>
+                  </svg>
+                </div>
+                <h4 class="feature-name">Live GPS Telemetry</h4>
+                <p class="feature-desc">Continuous satellite tracking and waypoint confirmation along international shipping corridors.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-box">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <h4 class="feature-name">Confidential Manifest Access</h4>
+                <p class="feature-desc">Client manifests and recipient details are strictly encrypted. Only authorized tracking code holders can view route milestones.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-box">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                  </svg>
+                </div>
+                <h4 class="feature-name">24/7 Rapid Response</h4>
+                <p class="feature-desc">Dedicated security dispatchers monitoring transit exceptions, clearance holds, and final mile handoffs.</p>
+              </div>
             </div>
           </div>
         </section>
