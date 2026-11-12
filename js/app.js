@@ -157,8 +157,8 @@ class TrackkApp {
       if (avatarEl) avatarEl.textContent = 'ADM';
       if (topAdminBtn) topAdminBtn.textContent = 'Admin Mode';
     } else {
-      if (roleEl) roleEl.textContent = 'Public Tracking Portal';
-      if (avatarEl) avatarEl.textContent = 'SL';
+      if (roleEl) roleEl.textContent = 'Secure Tracking Portal';
+      if (avatarEl) avatarEl.textContent = 'LG';
       if (topAdminBtn) topAdminBtn.textContent = 'Admin Portal';
     }
   }

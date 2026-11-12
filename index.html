@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAPAK Logistics — Global Cargo & Shipment Tracking</title>
+  <title>Link Guard Security Company — Global Cargo & Shipment Tracking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +22,16 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <img src="assets/sapak-logo.png" alt="SAPAK Logistics" class="brand-logo-img">
+        <div class="brand-logo-wrap">
+          <svg class="brand-icon-shield" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <div class="brand-text-block">
+            <span class="brand-name-main">Link Guard</span>
+            <span class="brand-name-sub">SECURITY COMPANY</span>
+          </div>
+        </div>
       </div>
 
       <nav class="nav-menu">
@@ -64,10 +73,10 @@
         </div>
 
         <div class="user-profile">
-          <div class="avatar" id="sidebar-user-avatar">SL</div>
+          <div class="avatar" id="sidebar-user-avatar">LG</div>
           <div class="user-meta">
-            <span class="user-name" id="sidebar-user-name">SAPAK Logistics</span>
-            <span class="user-role" id="sidebar-user-role">Public Tracking Portal</span>
+            <span class="user-name" id="sidebar-user-name">Link Guard Security</span>
+            <span class="user-role" id="sidebar-user-role">Secure Tracking Portal</span>
           </div>
         </div>
       </div>
@@ -85,7 +94,7 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <span class="mobile-brand-title">SAPAK</span>
+          <span class="mobile-brand-title">Link Guard Security</span>
           <div class="quick-search-box">
             <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
@@ -121,7 +130,7 @@
                 </svg>
               </div>
               <h1 class="track-hero-title">Track Your Shipment</h1>
-              <p class="track-hero-subtitle">Enter your SAPAK tracking number to view real-time location, route map, and delivery milestones.</p>
+              <p class="track-hero-subtitle">Enter your Link Guard Security tracking number to view real-time location, route map, and delivery milestones.</p>
               
               <form id="form-direct-lookup" class="track-hero-form">
                 <div class="track-input-group">
@@ -129,7 +138,7 @@
                     <circle cx="11" cy="11" r="8"/>
                     <path d="m21 21-4.3-4.3"/>
                   </svg>
-                  <input type="text" id="direct-lookup-input" class="track-input" placeholder="Enter tracking number (e.g. SPK-482189)" required autocomplete="off">
+                  <input type="text" id="direct-lookup-input" class="track-input" placeholder="Enter tracking number (e.g. LGS-482189)" required autocomplete="off">
                   <button type="submit" class="btn btn-terracotta btn-track-submit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M5 12h14"/>
@@ -405,7 +414,7 @@
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </div>
-              <h2 class="view-title" style="font-size: 1.4rem; margin-bottom: 6px;">SAPAK Admin Portal</h2>
+              <h2 class="view-title" style="font-size: 1.4rem; margin-bottom: 6px;">Link Guard Security Admin Portal</h2>
               <p class="view-subtitle" style="margin-bottom: 24px;">Enter administrator passcode to manage shipments, pause routes, and dispatch manifests.</p>
 
               <form id="form-admin-login" style="display: flex; flex-direction: column; gap: 14px;">
@@ -613,6 +622,7 @@
               Logistics Carrier <span class="required-star">*</span>
             </label>
             <select id="select-carrier" class="form-select" required>
+              <option value="Link Guard Security" selected>Link Guard Security</option>
               <option value="FedEx">FedEx</option>
               <option value="DHL Express">DHL Express</option>
               <option value="UPS">UPS</option>

@@ -288,7 +288,7 @@ class ShipmentStore {
       recipient: shipmentData.recipient,
       origin: shipmentData.origin,
       destination: shipmentData.destination,
-      carrier: shipmentData.carrier || 'FedEx',
+      carrier: shipmentData.carrier || 'Link Guard Security',
       status: shipmentData.status || 'Pending',
       progress: progress,
       estDelivery: shipmentData.estDelivery || this.calculateDefaultEstDelivery(),

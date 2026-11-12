@@ -68,7 +68,7 @@ function fallbackCopy(text, successMsg) {
 }
 
 function generateTrackingId() {
-  const prefix = 'SPK';
+  const prefix = 'LGS';
   const randNum = Math.floor(100000 + Math.random() * 900000);
   return `${prefix}-${randNum}`;
 }
@@ -117,7 +117,7 @@ function exportShipmentsToCSV(shipments) {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `SAPAK_Logistics_Shipments_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.setAttribute("download", `Link_Guard_Security_Shipments_${new Date().toISOString().slice(0, 10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -161,7 +161,7 @@ function copyTrackingLink(shipmentId, successMsg = 'Direct tracking link copied!
   if (navigator.share) {
     navigator.share({
       title: `Track Shipment ${shipmentId}`,
-      text: `Track package ${shipmentId} live on SAPAK Logistics:`,
+      text: `Track package ${shipmentId} live on Link Guard Security Company:`,
       url: shareUrl
     }).then(() => {
       showToast('Share menu opened!');
