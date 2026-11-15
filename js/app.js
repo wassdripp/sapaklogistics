@@ -11,12 +11,13 @@ class TrackkApp {
     this.adminSearchQuery = '';
     this.pendingDeleteId = null;
 
-    this.isAdmin = sessionStorage.getItem('sapak_admin_auth') === 'true';
+    this.isAdmin = false;
+    sessionStorage.removeItem('sapak_admin_auth');
 
     this.init();
   }
 
-  init() {
+  async init() {
     // Populate cities in the New Shipment modal dropdowns
     populateCitySelects();
 
@@ -32,6 +33,13 @@ class TrackkApp {
     store.subscribe(() => {
       this.refreshAll();
     });
+
+    // Restore staff state only after the server verifies its HttpOnly cookie.
+    try {
+      const response = await fetch('/api/admin-auth', { credentials: 'same-origin', cache: 'no-store' });
+      this.isAdmin = response.ok && (await response.json()).authenticated === true;
+    } catch { this.isAdmin = false; }
+    this.updateUserRoleBadge();
 
     // Handle hash routing on initial load
     window.addEventListener('hashchange', () => this.handleHashChange());
@@ -618,7 +626,17 @@ class TrackkApp {
 
   // ================= ADMIN PORTAL =================
   
-  logoutAdmin() {
+  async logoutAdmin() {
+    try {
+      const response = await fetch('/api/admin-auth', {
+        method: 'DELETE', credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'LinkGuard' }
+      });
+      if (!response.ok) throw new Error('Logout failed');
+    } catch {
+      showToast('Could not sign out. Please try again.', 'error');
+      return;
+    }
     this.isAdmin = false;
     sessionStorage.removeItem('sapak_admin_auth');
     document.body.classList.remove('is-admin');
@@ -630,17 +648,28 @@ class TrackkApp {
   setupAdminFeatures() {
     // Admin Login Form
     const loginForm = document.getElementById('form-admin-login');
-    loginForm?.addEventListener('submit', (e) => {
+    loginForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const pass = document.getElementById('input-admin-pass').value;
-      if (pass === 'admin123' || pass === 'admin') {
+      const input = document.getElementById('input-admin-pass');
+      const button = loginForm.querySelector('[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        const response = await fetch('/api/admin-auth', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'LinkGuard' },
+          body: JSON.stringify({ password: input.value })
+        });
+        const result = await response.json();
+        if (!response.ok || result.authenticated !== true) throw new Error(result.error || 'Unable to sign in.');
         this.isAdmin = true;
-        sessionStorage.setItem('sapak_admin_auth', 'true');
+        input.value = '';
         showToast('Admin access granted');
         this.updateUserRoleBadge();
         this.switchView('admin');
-      } else {
-        showToast('Invalid administrator passcode', 'error');
+      } catch (error) {
+        showToast(error.message || 'Unable to reach staff login. Please try again.', 'error');
+      } finally {
+        if (button) button.disabled = false;
       }
     });
 

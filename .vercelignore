@@ -1,0 +1,5 @@
+﻿.env*
+!.env.example
+tests/
+VERCEL_SETUP.md
+.git/
