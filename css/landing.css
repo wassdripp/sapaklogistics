@@ -52,6 +52,7 @@ h1 { font-size: clamp(38px, 4.6vw, 62px); font-weight: 500; line-height: 1.04; l
 .contact .kicker { margin-bottom: 15px; }
 .contact h2 { font-size: 22px; letter-spacing: -.035em; font-weight: 400; margin: 0 0 12px; }
 .contact p:not(.kicker) { font-size: 12px; color: var(--muted); margin: 0; }
+.contact-email { display: inline-block; margin-top: 12px; text-decoration: underline; text-underline-offset: 3px; }
 .contact-phone { font-size: 22px; letter-spacing: -.035em; white-space: nowrap; position: relative; padding-right: 35px; }
 .contact-phone > span:first-child { display: block; font-size: 9px; letter-spacing: .1em; color: #7b866c; margin-bottom: 12px; }
 .phone-arrow { position: absolute; right: 0; bottom: 0; color: #7b866c; }
