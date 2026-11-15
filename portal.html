@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Guard Security Company — Global Cargo & Shipment Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS for clean interactive world map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/modern.css">
+  <link rel="icon" type="image/webp" href="assets/link-guard-logo.webp">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <a href="index.html" class="brand-link" title="Link Guard Security Company">
+          <img src="assets/link-guard-logo.webp" alt="Link Guard Security Company" class="brand-logo-img">
+        </a>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span>Track Package</span>
+        </button>
+
+        <!-- Admin Only: Full Shipments Directory (Hidden from regular users) -->
+        <button class="nav-item admin-only-nav" data-view="shipments" id="nav-shipments" style="display: none !important;">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m7.5 4.27 9 5.15"/>
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5"/>
+            <path d="M12 22V12"/>
+          </svg>
+          <span>All Shipments</span>
+          <span class="badge-count" id="nav-shipment-count">0</span>
+        </button>
+
+        <!-- Admin Only: Fleet Dispatch (Hidden from regular users) -->
+        <button class="nav-item btn-nav-admin admin-only-nav" data-view="admin" id="nav-admin" style="display: none !important;">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span id="nav-admin-label">Admin Login</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="footer-brand-mark" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div>
+          <div class="user-meta">
+            <span class="user-name" id="sidebar-user-name">Link Guard Security</span>
+            <span class="user-role" id="sidebar-user-role">Secure Tracking Portal</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Bar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <a href="index.html" class="mobile-brand-link"><img src="assets/link-guard-logo.webp" alt="Link Guard Security" class="mobile-brand-logo-img"></a>
+          <div class="quick-search-box">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input aria-label="Search shipments" type="text" id="global-search-input" placeholder="Search by tracking #, recipient, or city..." autocomplete="off">
+            <kbd class="search-kbd">⌘K</kbd>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="tel:+13183500683" class="header-support-pill" title="24/7 Security Dispatch & Client Support">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <span class="support-label">Support:</span>
+            <span class="support-number">+1 (318) 350-0683</span>
+          </a>
+          <button class="btn btn-outline admin-only-nav" id="btn-top-admin-toggle" style="display: none !important;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span id="top-admin-btn-label">Admin Login</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Main View Container -->
+      <main class="content-scroll" id="content-area">
+        
+        <!-- ================= VIEW 1: PUBLIC TRACK YOUR SHIPMENT ================= -->
+        <section class="view-panel active" id="view-dashboard">
+          <div class="tracking-page-heading"><p>LINK GUARD SECURITY COMPANY</p><h1>Track a shipment</h1></div>
+          <div class="track-hero">
+            <div class="track-hero-inner">
+              <p class="lookup-description">Enter the tracking number from your shipment confirmation.</p>
+              <form id="form-direct-lookup" class="track-hero-form"><label class="tracking-label" for="direct-lookup-input">Your tracking number</label>
+                <div class="track-input-group">
+                  <svg class="track-input-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input type="text" id="direct-lookup-input" class="track-input" placeholder="e.g. LGS-482189" required autocomplete="off">
+                  <button type="submit" class="btn btn-terracotta btn-track-submit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14"/>
+                      <path d="m12 5 7 7-7 7"/>
+                    </svg>
+                    <span>Track shipment</span>
+                  </button>
+                </div>
+              </form>
+              <p class="tracking-hint">Tracking numbers look like LGS-482189.</p>
+            </div>
+          </div>
+
+          <!-- User's Own Recent Lookups (Only shown if queried on this device) -->
+          <div class="user-recent-section" id="user-recent-section" style="display: none;">
+            <div class="card-header">
+              <div>
+                <h3 class="recent-tracked-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Recent lookups</span>
+                </h3>
+                <p class="card-subtitle">Shipments you have tracked on this device.</p>
+              </div>
+            </div>
+            <div class="recent-tracked-grid" id="user-recent-grid">
+              <!-- Dynamically populated only with current user's lookups -->
+            </div>
+          </div>
+
+          <section class="tracking-help" aria-labelledby="tracking-help-title">
+            <div class="help-heading"><h2 id="tracking-help-title">Tracking help</h2><p>A few things to know before you search.</p></div>
+            <div class="help-questions">
+              <details><summary>Where do I find my tracking number?</summary><p>Look in the shipment confirmation provided by the sender. If you haven't received a number, contact the sender to request it.</p></details>
+              <details><summary>Why isn't my shipment showing up?</summary><p>Check that you've entered the full tracking number without extra spaces. If it still isn't found, contact support using the number at the top of this page.</p></details>
+              <details><summary>What information can I see?</summary><p>Your shipment record includes its current status, route, estimated delivery date, and recorded checkpoints.</p></details>
+            </div>
+          </section>
+          <footer class="tracking-page-footer"><span>Link Guard Security Company</span><span>Shipment tracking</span></footer>
+        </section>
+
+        <!-- ================= VIEW 2: PUBLIC SHIPMENTS DIRECTORY ================= -->
+        <section class="view-panel" id="view-shipments">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Shipments Directory</h1>
+              <p class="view-subtitle">Live status across domestic and international shipping corridors</p>
+            </div>
+            <div class="view-actions">
+              <button class="btn btn-secondary" id="btn-export-csv-table">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="table-filter-bar card">
+            <div class="filter-group-left">
+              <div class="search-input-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="text" id="table-search-input" placeholder="Search tracking #, recipient, origin, destination...">
+              </div>
+
+              <div class="filter-select-wrapper">
+                <label for="filter-status-select" class="filter-label">Status:</label>
+                <select id="filter-status-select" class="filter-select">
+                  <option value="ALL">All Statuses</option>
+                  <option value="In Transit">In Transit</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Out for Delivery">Out for Delivery</option>
+                  <option value="Paused">Paused / On Hold</option>
+                  <option value="Delayed">Delayed</option>
+                </select>
+              </div>
+
+              <div class="filter-select-wrapper">
+                <label for="filter-carrier-select" class="filter-label">Carrier:</label>
+                <select id="filter-carrier-select" class="filter-select">
+                  <option value="ALL">All Carriers</option>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-summary">
+              <span id="filtered-items-count">Showing 0 shipments</span>
+            </div>
+          </div>
+
+          <!-- Table Card -->
+          <div class="card table-container">
+            <table class="data-table" id="shipments-table">
+              <thead>
+                <tr>
+                  <th>Tracking ID</th>
+                  <th>Recipient</th>
+                  <th>Origin</th>
+                  <th>Destination</th>
+                  <th>Carrier</th>
+                  <th>Status</th>
+                  <th>Est. Delivery</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="shipments-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+            
+            <div class="empty-state-card" id="table-empty-state" style="display: none;">
+              <div class="empty-icon">📦</div>
+              <h3>No shipments found</h3>
+              <p>Try modifying your search criteria.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 3: PUBLIC SHIPMENT DETAIL & WORLD MAP ================= -->
+        <section class="view-panel" id="view-detail">
+          <div class="detail-header-nav">
+            <button class="btn btn-outline btn-back" id="btn-back-to-list">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back to Directory</span>
+            </button>
+            
+            <div class="detail-nav-actions">
+              <button class="btn btn-outline" id="btn-detail-copy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+                <span>Copy Tracking #</span>
+              </button>
+              <button class="btn btn-terracotta" id="btn-detail-share-link" title="Copy shareable tracking link with shipment payload">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                <span>Share Tracking Link</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Main Detail Headline -->
+          <div class="shipment-hero-banner card">
+            <div class="hero-left">
+              <div class="hero-tracking-tag">
+                <span class="tracking-label">TRACKING ID</span>
+                <span class="tracking-number-code" id="detail-tracking-code">SPK-00000</span>
+              </div>
+              <h2 class="hero-recipient" id="detail-recipient">Recipient Name</h2>
+              <div class="hero-route-summary">
+                <span class="route-city" id="detail-origin-city">Origin</span>
+                <svg class="route-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                <span class="route-city" id="detail-dest-city">Destination</span>
+              </div>
+            </div>
+
+            <div class="hero-right">
+              <div class="detail-status-pill-wrap" id="detail-status-container">
+                <span class="status-badge status-lg status-transit">In Transit</span>
+              </div>
+              <div class="hero-progress-container">
+                <div class="progress-labels">
+                  <span>Routing Progress</span>
+                  <span id="detail-progress-percent">65%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="detail-progress-fill" style="width: 65%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTERACTIVE GOOGLE MAP COMPONENT -->
+          <div class="card map-tracking-card">
+            <div class="map-card-header">
+              <div class="map-title-row">
+                <div class="map-pin-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="card-title">Live Geolocation Route Map</h3>
+                  <p class="card-subtitle">Real-time transit trajectory powered by Google Maps</p>
+                </div>
+              </div>
+
+              <div class="map-legend">
+                <div class="legend-item"><span class="legend-dot origin-dot"></span> Origin</div>
+                <div class="legend-item"><span class="legend-dot current-dot"></span> Live Parcel</div>
+                <div class="legend-item"><span class="legend-dot dest-dot"></span> Destination</div>
+              </div>
+            </div>
+
+            <!-- Leaflet Map Container -->
+            <div class="map-viewport-wrapper">
+              <div id="shipment-leaflet-map" class="leaflet-map-element"></div>
+              
+              <!-- Map Overlay Floating Stat Box -->
+              <div class="map-floating-overlay" id="map-floating-info">
+                <div class="floating-stat">
+                  <span class="stat-caption">Last Reported Hub</span>
+                  <span class="stat-highlight" id="map-hub-name">Mid-transit corridor</span>
+                </div>
+                <div class="floating-divider"></div>
+                <div class="floating-stat">
+                  <span class="stat-caption">Estimated Arrival</span>
+                  <span class="stat-highlight" id="map-est-date">Oct 12, 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Grid: Metadata Info Cards + Timeline -->
+          <div class="detail-two-col-grid">
+            <!-- Left Column: Specs / Key Info -->
+            <div class="specs-col">
+              <div class="card info-box-grid">
+                <div class="info-cell">
+                  <span class="info-label">Carrier Partner</span>
+                  <span class="info-val font-semibold" id="detail-carrier">FedEx Express</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Package Category</span>
+                  <span class="info-val" id="detail-package-type">Commercial Goods</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Weight / Volume</span>
+                  <span class="info-val" id="detail-weight">3.4 kg (Standard)</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Dispatch Date</span>
+                  <span class="info-val" id="detail-dispatch-date">Sep 24, 2026</span>
+                </div>
+                <div class="info-cell info-cell-full">
+                  <span class="info-label">Delivery Instructions</span>
+                  <p class="info-val info-notes" id="detail-notes">Leave at reception desk if unattended.</p>
+                </div>
+              </div>
+
+              <!-- Dedicated Consignment Support Card -->
+              <div class="card support-help-card" style="margin-top: 14px; padding: 14px 16px; background: #FEF7EA; border: 1px solid #F6DFB6; border-radius: var(--radius-md);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: #DDA238; color: #111D2E; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #966718; text-transform: uppercase; letter-spacing: 0.05em;">Need Assistance with this Cargo?</span>
+                    <a href="tel:+13183500683" style="font-size: 0.98rem; font-weight: 700; color: #132238; text-decoration: none;">+1 (318) 350-0683</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Vertical Journey Stepper Timeline -->
+            <div class="timeline-col">
+              <div class="card timeline-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Journey Milestones</h3>
+                    <p class="card-subtitle">Verifiable carrier scan history</p>
+                  </div>
+                </div>
+
+                <div class="stepper-timeline" id="detail-timeline-steps">
+                  <!-- Dynamic milestones rendered by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 4: ADMIN PORTAL ================= -->
+        <section class="view-panel" id="view-admin">
+          
+          <!-- State A: Admin Login Required Screen -->
+          <div class="admin-login-wrapper" id="admin-login-screen">
+            <div class="card admin-login-card">
+              <div class="admin-login-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              <h2 class="view-title" style="font-size: 1.4rem; margin-bottom: 6px;">Link Guard Security Admin Portal</h2>
+              <p class="view-subtitle" style="margin-bottom: 24px;">Enter administrator passcode to manage shipments, pause routes, and dispatch manifests.</p>
+
+              <form id="form-admin-login" style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-group" style="text-align: left;">
+                  <label for="input-admin-pass" class="form-label">Administrator Passcode</label>
+                  <input type="password" id="input-admin-pass" class="form-input" placeholder="Enter admin passcode" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-terracotta" style="width: 100%; padding: 11px;">
+                  <span>Authenticate & Open Admin Dashboard</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- State B: Admin Active Dashboard (When logged in) -->
+          <div id="admin-dashboard-screen" style="display: none;">
+            <div class="view-header">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                  <h1 class="view-title">Fleet Dispatch & Control</h1>
+                  <span class="admin-badge">Admin Mode</span>
+                </div>
+                <p class="view-subtitle">Create new shipments, toggle status, hold/pause parcels, and manage records</p>
+              </div>
+              <div class="view-actions">
+                <button class="btn btn-secondary" id="btn-admin-logout">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  <span>Lock / Logout</span>
+                </button>
+                <button class="btn btn-terracotta" id="btn-admin-create-shipment">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14"/>
+                    <path d="M5 12h14"/>
+                  </svg>
+                  <span>+ Create Shipment</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Admin Overview Metrics Grid -->
+            <div class="metrics-grid">
+              <div class="metric-card" id="card-admin-stat-total">
+                <div class="metric-header">
+                  <span class="metric-label">Total Shipments</span>
+                  <div class="metric-icon-wrap" style="background: var(--bg-subtle); color: var(--text-primary);">📦</div>
+                </div>
+                <div class="metric-value" id="admin-stat-total">0</div>
+                <div class="metric-foot"><span class="metric-subtext">All registered parcels</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">In Transit</span>
+                  <div class="metric-icon-wrap icon-transit">🚚</div>
+                </div>
+                <div class="metric-value" id="admin-stat-transit">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Actively moving</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">Paused / On Hold</span>
+                  <div class="metric-icon-wrap" style="background: var(--status-paused-bg); color: var(--status-paused-text);">⏸️</div>
+                </div>
+                <div class="metric-value" id="admin-stat-paused">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Temporary routing holds</span></div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-label">Delivered</span>
+                  <div class="metric-icon-wrap icon-delivered">✅</div>
+                </div>
+                <div class="metric-value" id="admin-stat-delivered">0</div>
+                <div class="metric-foot"><span class="metric-subtext">Completed drop-offs</span></div>
+              </div>
+            </div>
+
+            <!-- Admin Filter Bar -->
+            <div class="table-filter-bar card">
+              <div class="filter-group-left">
+                <div class="search-input-pill">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input type="text" id="admin-table-search" placeholder="Search manifest database...">
+                </div>
+
+                <div class="filter-select-wrapper">
+                  <label for="admin-filter-status" class="filter-label">Status:</label>
+                  <select id="admin-filter-status" class="filter-select">
+                    <option value="ALL">All Statuses</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Paused">Paused / On Hold</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Delayed">Delayed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-summary">
+                <span id="admin-table-count">Showing 0 shipments</span>
+              </div>
+            </div>
+
+            <!-- Admin Table -->
+            <div class="card table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tracking ID</th>
+                    <th>Recipient</th>
+                    <th>Origin &rarr; Destination</th>
+                    <th>Carrier</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th class="text-right">Admin Controls</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-shipments-tbody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CREATE NEW SHIPMENT (ADMIN ONLY) ================= -->
+  <div class="modal-backdrop" id="modal-new-shipment">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="m3.3 7 8.7 5 8.7-5"/>
+              <path d="M12 22V12"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Admin: Create New Shipment</h2>
+            <p class="modal-subtitle">Register a parcel with origin and destination coordinates for tracking</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="form-create-shipment" class="modal-body">
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="input-tracking-id" class="form-label">
+              Tracking Number <span class="required-star">*</span>
+            </label>
+            <div class="input-with-action">
+              <input type="text" id="input-tracking-id" class="form-input" required placeholder="SPK-98310">
+              <button type="button" class="btn-input-accessory" id="btn-gen-tracking" title="Generate random tracking code">
+                🎲 Auto
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-recipient" class="form-label">
+              Recipient Name <span class="required-star">*</span>
+            </label>
+            <input type="text" id="input-recipient" class="form-input" required placeholder="e.g. Maya Lin, Acme Corp">
+          </div>
+        </div>
+
+        <div class="form-row form-row-2">
+          <!-- Origin City Selection -->
+          <div class="form-group">
+            <label for="select-origin-city" class="form-label">
+              Origin City / Hub <span class="required-star">*</span>
+            </label>
+            <select id="select-origin-city" class="form-select" required>
+              <!-- Filled with cities via JS -->
+            </select>
+          </div>
+
+          <!-- Destination City Selection -->
+          <div class="form-group">
+            <label for="select-dest-city" class="form-label">
+              Destination City <span class="required-star">*</span>
+            </label>
+            <select id="select-dest-city" class="form-select" required>
+              <!-- Filled with cities via JS -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label for="select-carrier" class="form-label">
+              Logistics Carrier <span class="required-star">*</span>
+            </label>
+            <select id="select-carrier" class="form-select" required>
+              <option value="Link Guard Security" selected>Link Guard Security</option>
+              <option value="FedEx">FedEx</option>
+              <option value="DHL Express">DHL Express</option>
+              <option value="UPS">UPS</option>
+              <option value="USPS Priority">USPS Priority</option>
+              <option value="Royal Mail">Royal Mail</option>
+              <option value="Maersk Line">Maersk Line</option>
+              <option value="Japan Post">Japan Post</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="select-status" class="form-label">
+              Initial Status
+            </label>
+            <select id="select-status" class="form-select">
+              <option value="Pending">Pending (Label Created)</option>
+              <option value="In Transit" selected>In Transit</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Paused">Paused / On Hold</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Delayed">Delayed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-est-delivery" class="form-label">
+              Estimated Delivery
+            </label>
+            <input type="date" id="input-est-delivery" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="input-package-type" class="form-label">
+              Package Type / Contents
+            </label>
+            <input type="text" id="input-package-type" class="form-input" placeholder="e.g. Tech Components, Apparel, Documents">
+          </div>
+
+          <div class="form-group">
+            <label for="input-weight" class="form-label">
+              Package Weight
+            </label>
+            <input type="text" id="input-weight" class="form-input" placeholder="e.g. 2.5 kg">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="input-notes" class="form-label">
+            Handling Notes or Delivery Instructions
+          </label>
+          <textarea id="input-notes" class="form-textarea" rows="2" placeholder="e.g. Signature required upon arrival; handle with care"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-terracotta">
+            <span>Register & Start Tracking</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: UPDATE STATUS & ADD NOTE (ADMIN) ================= -->
+  <div class="modal-backdrop" id="modal-update-status">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Admin: Update Status</h2>
+          <p class="modal-subtitle" id="status-modal-subtitle">SPK-89240</p>
+        </div>
+        <button class="btn-close-modal" id="modal-status-close-btn">&times;</button>
+      </div>
+
+      <form id="form-update-status" class="modal-body">
+        <input type="hidden" id="status-update-shipment-id">
+        
+        <div class="form-group">
+          <label for="status-update-select" class="form-label">New Status</label>
+          <select id="status-update-select" class="form-select">
+            <option value="Pending">Pending (Label Created)</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Paused">Paused / On Hold</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Delayed">Delayed</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status-update-location" class="form-label">Current Location / Hub</label>
+          <input type="text" id="status-update-location" class="form-input" placeholder="e.g. Frankfurt Sort Facility">
+        </div>
+
+        <div class="form-group">
+          <label for="status-update-note" class="form-label">Checkpoint Note / Activity</label>
+          <input type="text" id="status-update-note" class="form-input" placeholder="e.g. Cleared customs inspection">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-status-modal">Cancel</button>
+          <button type="submit" class="btn btn-terracotta">Save Status Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PAUSE / HOLD SHIPMENT (ADMIN) ================= -->
+  <div class="modal-backdrop" id="modal-pause-shipment">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge modal-icon-warning">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="4" height="16" x="6" y="4"/>
+              <rect width="4" height="16" x="14" y="4"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title" id="pause-modal-title">Pause Shipment</h2>
+            <p class="modal-subtitle" id="pause-modal-subtitle">Place routing on hold</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-pause-close-btn">&times;</button>
+      </div>
+
+      <form id="form-pause-shipment" class="modal-body">
+        <input type="hidden" id="pause-target-id">
+        <input type="hidden" id="pause-action-type" value="pause">
+
+        <div class="form-group" id="pause-reason-group">
+          <label for="select-pause-reason" class="form-label">Hold Reason</label>
+          <select id="select-pause-reason" class="form-select">
+            <option value="Customs clearance inspection hold">Customs clearance inspection hold</option>
+            <option value="Severe weather / Flight delay hold">Severe weather / Flight delay hold</option>
+            <option value="Recipient address verification needed">Recipient address verification needed</option>
+            <option value="Payment / Duty verification hold">Payment / Duty verification hold</option>
+            <option value="Customer requested delivery reschedule">Customer requested delivery reschedule</option>
+            <option value="Security compliance review">Security compliance review</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="pause-custom-note-group">
+          <label for="input-pause-note" class="form-label">Additional Checkpoint Note</label>
+          <input type="text" id="input-pause-note" class="form-input" placeholder="e.g. Awaiting customs release documentation">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-pause-modal">Cancel</button>
+          <button type="submit" class="btn btn-warning" id="btn-submit-pause">Confirm Hold</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CONFIRM DELETE SHIPMENT (ADMIN) ================= -->
+  <div class="modal-backdrop" id="modal-delete-confirm">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge modal-icon-danger">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Delete Shipment?</h2>
+            <p class="modal-subtitle">Permanent action</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-delete-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.5;">
+          Are you sure you want to permanently delete shipment <strong id="delete-modal-target-id" style="color: var(--text-primary); font-family: monospace;">SPK-000000</strong>? All GPS coordinates and scan history will be wiped.
+        </p>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+          <button type="button" class="btn btn-danger" id="btn-confirm-delete">Delete Permanently</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SHARE SHIPMENT LINK ================= -->
+  <div class="modal-backdrop" id="modal-share-shipment">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Share Direct Tracking Link</h2>
+            <p class="modal-subtitle" id="share-modal-subtitle">SPK-000000</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="modal-share-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+          Anyone with this link can track this shipment directly without logging in:
+        </p>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input type="text" id="share-modal-url-input" class="form-input" readonly style="font-size: 0.82rem; font-family: monospace; background: var(--bg-subtle);">
+          <button type="button" class="btn btn-terracotta" id="btn-share-modal-copy" style="white-space: nowrap;">
+            📋 Copy Link
+          </button>
+        </div>
+        <div id="share-modal-status-msg" style="font-size: 0.84rem; color: var(--accent-terracotta); font-weight: 600; text-align: center; display: none;">
+          ✓ Link copied to clipboard!
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-close-share-modal" style="width: 100%;">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Shelf -->
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet JS for World Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Modules -->
+  <script src="js/cities.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
