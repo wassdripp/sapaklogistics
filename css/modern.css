@@ -54,7 +54,10 @@
 .help-questions summary::after { content: '+'; position: absolute; right: 2px; color: #6a7c61; font-size: 1rem; font-weight: 400; }
 .help-questions details[open] summary::after { content: '\2212'; }
 .help-questions details p { padding: 0 28px 19px 0; color: #6c7865; font-size: .78rem; line-height: 1.8; }
-.tracking-page-footer { display: flex; justify-content: space-between; border-top: 1px solid #e1e5dc; padding-top: 18px; color: #8b9386; font-size: .66rem; }
+.tracking-page-footer { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; border-top: 1px solid #e1e5dc; padding-top: 18px; color: #8b9386; font-size: .66rem; }
+.tracking-contact { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.tracking-contact a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.shipment-support-email { display: block; margin-top: 6px; color: #132238; font-size: .8rem; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
 .user-recent-section { margin-bottom: 32px; }
 .sidebar .user-profile { gap: 10px; padding: 18px 6px 3px; border-top: 1px solid #cfe1d01f; align-items: center; }
 .footer-brand-mark { display: grid; place-items: center; flex: 0 0 30px; height: 34px; color: #a9bc99; }
